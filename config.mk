@@ -25,9 +25,9 @@ BUILD_DIR := build
 
 # Version
 ifeq ($(GAME_VERSION),FIRERED)
-  TITLE       := POKEMON SEA
-  GAME_CODE   := BPB
-  BUILD_NAME  := seablue
+  TITLE       := POKEMON FIRE
+  GAME_CODE   := BPR
+  BUILD_NAME  := SeaBlueVersion
 else
 ifeq ($(GAME_VERSION),LEAFGREEN)
   TITLE       := POKEMON LEAF

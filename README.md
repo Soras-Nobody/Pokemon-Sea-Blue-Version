@@ -1,7 +1,7 @@
-# Pokémon SeaBlue
+# Pokémon Sea Blue Version
 
-This is a decompilation of English Pokémon SeaBlue.
+This is the decompilation of Pokémon Sea Blue Version.
 
-It builds the following ROM images:
+It builds the following ROM image:
 
 * pokeseablue.gba
