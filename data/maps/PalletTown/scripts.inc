@@ -388,10 +388,6 @@ PalletTown_Movement_SignLadyMoveOutOfWayLeft::
 
 PalletTown_EventScript_FatMan::
 	msgbox PalletTown_Text_CanStoreItemsAndMonsInPC, MSGBOX_NPC
-	givemon SPECIES_BULBASAUR, 100
-	giveegg SPECIES_BULBASAUR
-	setflag FLAG_GLOBAL_EXP_SHARE
-	setflag FLAG_CAP_LEVEL
 	end
 
 PalletTown_EventScript_OaksLabSign::
