@@ -66,6 +66,4 @@ build-cmake-*/
 .cache/
 CMakeLists.txt
 compile_commands.json
-*.ss*
 *.toml
-symbols.txt
