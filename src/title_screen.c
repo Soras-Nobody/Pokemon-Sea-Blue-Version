@@ -94,9 +94,9 @@ static const u32 sStreak_Gfx[] = INCBIN_U32("graphics/title_screen/leafgreen/str
 #endif
 
 static const struct OamData sOamData_FlameOrLeaf = {
-    .objMode = ST_OAM_OBJ_NORMAL,
-    .shape = ST_OAM_SQUARE,
-    .size = ST_OAM_SIZE_1,
+    .objMode = ST_OAM_OBJ_BLEND,
+    .shape = ST_OAM_V_RECTANGLE,
+    .size = ST_OAM_SIZE_2,
     .tileNum = 0,
     .priority = 3,
     .paletteNum = 0
@@ -104,24 +104,22 @@ static const struct OamData sOamData_FlameOrLeaf = {
 
 #if defined(FIRERED)
 static const union AnimCmd sSpriteAnim_Flame[] = {
-    ANIMCMD_FRAME(0, 3),
-    ANIMCMD_FRAME(4, 6),
+    ANIMCMD_FRAME(0, 23),
     ANIMCMD_FRAME(8, 6),
-    ANIMCMD_FRAME(12, 6),
     ANIMCMD_FRAME(16, 6),
-    ANIMCMD_FRAME(20, 6),
     ANIMCMD_FRAME(24, 6),
-    ANIMCMD_FRAME(28, 6),
     ANIMCMD_FRAME(32, 6),
-    ANIMCMD_FRAME(36, 6),
+    ANIMCMD_FRAME(40, 6),
+    ANIMCMD_FRAME(48, 6),
+    ANIMCMD_FRAME(56, 6),
     ANIMCMD_END
 };
 
 static const union AnimCmd sSpriteAnim_Flame_Unused[] = {
-    ANIMCMD_FRAME(24, 6),
-    ANIMCMD_FRAME(28, 6),
     ANIMCMD_FRAME(32, 6),
-    ANIMCMD_FRAME(36, 6),
+    ANIMCMD_FRAME(40, 6),
+    ANIMCMD_FRAME(48, 6),
+    ANIMCMD_FRAME(56, 6),
     ANIMCMD_END
 };
 
@@ -288,8 +286,8 @@ static void (*const sSceneFuncs[])(s16 *data) = {
 
 #if defined(FIRERED)
 static const struct CompressedSpriteSheet sSpriteSheets[] = {
-    {sFlames_Gfx,                    0x500, TILE_TAG_FLAME_OR_LEAF},
-    {sBlankFlames_Gfx,               0x500, TILE_TAG_BLANK_OR_STREAK},
+    {sFlames_Gfx,                    0x800, TILE_TAG_FLAME_OR_LEAF},
+    {sBlankFlames_Gfx,               0x800, TILE_TAG_BLANK_OR_STREAK},
     {gTitleScreen_BlankSprite_Tiles, 0x400, TILE_TAG_BLANK},
     {sSlash_Gfx,                     0x800, TILE_TAG_SLASH}
 };
@@ -298,10 +296,6 @@ static const struct SpritePalette sSpritePals[] = {
     {sFlames_Pal,            PAL_TAG_DEFAULT},
     {gTitleScreen_Slash_Pal, PAL_TAG_SLASH},
     {}
-};
-
-static const u8 sFlameXPositions[] = {
-    4, 16, 26, 32, 48, 200, 216, 224, 232, 60, 76, 92, 108, 128, 144, 0
 };
 
 #elif defined(LEAFGREEN)
@@ -432,7 +426,7 @@ static void Task_TitleScreenTimer(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
 
-    if (data[0] >= 2700)
+    if (data[0] >= 5400)
     {
         sTitleScreenTimerTaskId = TASK_NONE;
         DestroyTask(taskId);
@@ -660,8 +654,9 @@ static void SetGpuRegsForTitleScreenRun(void)
 {
     SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJWIN_ON);
     SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG_ALL | WINOUT_WIN01_OBJ | WINOUT_WINOBJ_ALL);
-    SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_LIGHTEN);
+    SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_TGT2_BG3 | BLDCNT_EFFECT_LIGHTEN);
     SetGpuReg(REG_OFFSET_BLDY, 13);
+    SetGpuReg(REG_OFFSET_BLDALPHA, BLDALPHA_BLEND(12, 4));
 }
 
 static void SetTitleScreenScene_Restart(s16 *data)
@@ -765,6 +760,7 @@ static void Task_TitleScreen_SlideWin0(u8 taskId)
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG1 | WINOUT_WIN01_BG2 | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR);
         SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(0, DISPLAY_HEIGHT));
         SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(0, 0));
+        ChangeBgX(3, (DISPLAY_WIDTH) << 8, 0);
         BlendPalettes(1 << 0xE, 0, RGB_BLACK);
         data[0]++;
         break;
@@ -776,6 +772,7 @@ static void Task_TitleScreen_SlideWin0(u8 taskId)
             data[2] = DISPLAY_WIDTH;
             data[0]++;
         }
+        ChangeBgX(3, (DISPLAY_WIDTH - data[2]) << 8, 0);
         SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(0, data[2]));
         break;
     case 2:
@@ -1000,6 +997,7 @@ static bool32 CreateFlameSprite(s32 x, s32 y, s32 xspeed, s32 yspeed, bool32 cre
         gSprites[spriteId].data[5] = (xspeed * yspeed) % 16;
         gSprites[spriteId].data[6] = createFlame;
         gSprites[spriteId].callback = SpriteCallback_TitleScreenFlame;
+        StartSpriteAnim(&gSprites[spriteId], Random() % 2);
         return TRUE;
     }
     return FALSE;
@@ -1014,7 +1012,6 @@ static bool32 CreateFlameSprite(s32 x, s32 y, s32 xspeed, s32 yspeed, bool32 cre
 #define tTimer       data[1]
 #define tDelay       data[2]
 #define tOff_Seed       3   // data[3] and data[4]
-#define tOffsetX     data[5]
 
 static void Task_FlameSpawner(u8 taskId)
 {
@@ -1034,33 +1031,22 @@ static void Task_FlameSpawner(u8 taskId)
         {
             tTimer = 0;
             TitleScreen_rand(taskId, 3);
-            tDelay = 18;
-            xspeed = (TitleScreen_rand(taskId, 3) % 4) - 2;
-            yspeed = (TitleScreen_rand(taskId, 3) % 8) - 16;
-            y = (TitleScreen_rand(taskId, 3) % 3) + 116;
-            x = TitleScreen_rand(taskId, 3) % DISPLAY_WIDTH;
-            CreateFlameSprite(
-                x,
-                y,
-                xspeed,
-                yspeed,
-                (TitleScreen_rand(taskId, 3) % 16) < 8 ? FALSE : TRUE
-            );
-            for (i = 0; i < 15; i++)
+            tDelay = 27;
+            for (i = 0; i < 16; i++)
             {
+                x = TitleScreen_rand(taskId, 3) % DISPLAY_WIDTH;
+                y = (TitleScreen_rand(taskId, 3) % 3) + 122;
+                xspeed = (TitleScreen_rand(taskId, 3) % 4) - 2;
+                yspeed = (TitleScreen_rand(taskId, 3) % 8) - 16;
+
                 CreateFlameSprite(
-                    tOffsetX + sFlameXPositions[i],
+                    x,
                     y,
                     xspeed,
                     yspeed,
                     TRUE
                 );
-                xspeed = (TitleScreen_rand(taskId, 3) % 4) - 2;
-                yspeed = (TitleScreen_rand(taskId, 3) % 8) - 16;
             }
-            tOffsetX++;
-            if (tOffsetX > 3)
-                tOffsetX = 0;
         }
     }
 }
@@ -1069,7 +1055,6 @@ static void Task_FlameSpawner(u8 taskId)
 #undef tTimer
 #undef tDelay
 #undef tOff_Seed
-#undef tOffsetX
 
 #elif defined(LEAFGREEN)
 

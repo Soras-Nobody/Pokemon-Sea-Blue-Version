@@ -38,6 +38,6 @@ jobs:
           ./install.sh ../
         working-directory: ./agbcc
 
-      - name: Build FireRed
+      - name: Build SeaBlue
         run: |
           make -j${nproc} all

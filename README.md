@@ -1,7 +1,7 @@
 # Pokémon Sea Blue Version
 
-This is the decompilation of Pokémon Sea Blue Version.
+This is the source code of Pokemon Sea Blue Version.
 
-It builds the following ROM image:
+It builds the following ROM:
 
-* pokeseablue.gba
+* PokemonSeaBlueVersion.gba
