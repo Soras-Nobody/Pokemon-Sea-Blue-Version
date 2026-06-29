@@ -1259,11 +1259,19 @@ static void IntroCB_GF_RevealLogo(struct IntroSequenceData * this)
         {
             DestroySprite(this->gameFreakLogoArtSprite);
             GFScene_CreatePresentsSprite();
-            this->timer = 0;
+            SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_OBJ | BLDCNT_EFFECT_BLEND | BLDCNT_TGT2_ALL);
+            StartBlendTask(0, 16, 16, 0, 4, 0);
             this->state++;
         }
         break;
     case 4:
+        if (!IsBlendTaskActive())
+        {
+            this->timer = 0;
+            this->state++;
+        }
+        break;
+    case 5:
         if (++this->timer > 90)
         {
             SetGpuRegBits(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG2);
@@ -1271,20 +1279,20 @@ static void IntroCB_GF_RevealLogo(struct IntroSequenceData * this)
             this->state++;
         }
         break;
-    case 5:
+    case 6:
         if (!IsBlendTaskActive())
         {
             HideBg(BG_GF_TEXT_LOGO);
             this->state++;
         }
         break;
-    case 6:
+    case 7:
         ResetSpriteData();
         FreeAllSpritePalettes();
         this->timer = 0;
         this->state++;
         break;
-    case 7:
+    case 8:
         if (++this->timer > 20)
         {
             SetGpuReg(REG_OFFSET_BLDCNT, 0);

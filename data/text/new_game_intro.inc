@@ -13,6 +13,12 @@ gNameChoice_Leaf::
 gNameChoice_Fire::
     .string "FIRE$"
 
+gNameChoice_Sea::
+    .string "SEA$"
+
+gNameChoice_Blue::
+    .string "BLUE$"
+
 gNameChoice_Gary::
     .string "GARY$"
 
@@ -211,8 +217,11 @@ gOakSpeech_Text_TellMeALittleAboutYourself::
     .string "But first, tell me a little about\n"
     .string "yourself.\p$"
 
+gOakSpeech_Text_VeryWell::
+    .string "Very well…$"
+
 gOakSpeech_Text_YourNameWhatIsIt::
-    .string "Let's begin with your name.\n"
+    .string "Let's continue with your name.\n"
     .string "What is it?\p$"
 
 gOakSpeech_Text_SoYourNameIsPlayer::
@@ -240,4 +249,4 @@ gOakSpeech_Text_LetsGo::
     .string "Your very own POKéMON legend is\n"
     .string "about to unfold!\p"
     .string "A world of dreams and adventures\n"
-    .string "with POKéMON awaits! Let's go!$"
+    .string "with POKéMON awaits! Let's go!\p$"

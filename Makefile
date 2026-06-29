@@ -179,6 +179,12 @@ rom: $(ROM)
 
 syms: $(SYM)
 
+.PHONY: remake
+
+remake:
+	@$(MAKE) clean
+	@$(MAKE)
+
 clean: tidy clean-tools clean-generated clean-assets
 
 clean-assets:
