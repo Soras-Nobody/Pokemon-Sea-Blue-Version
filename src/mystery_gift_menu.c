@@ -6,7 +6,7 @@
 #include "menu.h"
 #include "new_menu_helpers.h"
 #include "mystery_gift_menu.h"
-#include "title_screen.h"
+#include "main_menu.h"
 #include "list_menu.h"
 #include "link_rfu.h"
 #include "mystery_gift.h"
@@ -362,6 +362,7 @@ void CB2_MysteryGiftEReader(void)
     RunTextPrinters();
     AnimateSprites();
     BuildOamBuffer();
+    UpdatePaletteFade();
 }
 
 bool32 HandleMysteryGiftOrEReaderSetup(s32 isEReader)
@@ -460,7 +461,7 @@ void MainCB_FreeAllBuffersAndReturnToInitTitleScreen(void)
     Free(GetBgTilemapBuffer(1));
     Free(GetBgTilemapBuffer(2));
     Free(GetBgTilemapBuffer(3));
-    SetMainCallback2(CB2_InitTitleScreen);
+    SetMainCallback2(CB2_InitMainMenu);
 }
 
 void PrintMysteryGiftOrEReaderTopMenu(bool8 isEReader, bool32 useCancel)
@@ -1090,6 +1091,7 @@ enum {
     MG_STATE_SERVER_RESULT_MSG,
     MG_STATE_SERVER_ERROR,
     MG_STATE_EXIT,
+    MG_STATE_EXIT_MAIN,
 };
 
 static void CreateMysteryGiftTask(void)
@@ -1597,8 +1599,16 @@ void Task_MysteryGift(u8 taskId)
         CloseLink();
         HelpSystem_Enable();
         Free(data->clientMsg);
-        DestroyTask(taskId);
-        SetMainCallback2(MainCB_FreeAllBuffersAndReturnToInitTitleScreen);
+        BeginNormalPaletteFade((PALETTES_ALL & ~(1 << 0x1C) & ~(1 << 0x1D) & ~(1 << 0x1E) & ~(1 << 0x1F)), 0, 0, 16, RGB_WHITE);
+        FadeOutBGM(4);
+        data->state = MG_STATE_EXIT_MAIN;
+        break;
+    case MG_STATE_EXIT_MAIN:
+        if (!gPaletteFade.active)
+        {
+            DestroyTask(taskId);
+            SetMainCallback2(MainCB_FreeAllBuffersAndReturnToInitTitleScreen);
+        }
         break;
     }
 }

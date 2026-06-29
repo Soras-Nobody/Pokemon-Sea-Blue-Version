@@ -1258,14 +1258,20 @@ static void IntroCB_GF_RevealLogo(struct IntroSequenceData * this)
         if (!IsDma3ManagerBusyWithBgCopy())
         {
             DestroySprite(this->gameFreakLogoArtSprite);
-        #if REVISION >= 1
             GFScene_CreatePresentsSprite();
-        #endif
-            this->timer = 0;
+            SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_OBJ | BLDCNT_EFFECT_BLEND | BLDCNT_TGT2_ALL);
+            StartBlendTask(0, 16, 16, 0, 4, 0);
             this->state++;
         }
         break;
     case 4:
+        if (!IsBlendTaskActive())
+        {
+            this->timer = 0;
+            this->state++;
+        }
+        break;
+    case 5:
         if (++this->timer > 90)
         {
             SetGpuRegBits(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG2);
@@ -1273,20 +1279,20 @@ static void IntroCB_GF_RevealLogo(struct IntroSequenceData * this)
             this->state++;
         }
         break;
-    case 5:
+    case 6:
         if (!IsBlendTaskActive())
         {
             HideBg(BG_GF_TEXT_LOGO);
             this->state++;
         }
         break;
-    case 6:
+    case 7:
         ResetSpriteData();
         FreeAllSpritePalettes();
         this->timer = 0;
         this->state++;
         break;
-    case 7:
+    case 8:
         if (++this->timer > 20)
         {
             SetGpuReg(REG_OFFSET_BLDCNT, 0);
@@ -2104,14 +2110,12 @@ static struct Sprite *GFScene_CreateLogoSprite(void)
     return &gSprites[spriteId];
 }
 
-#if REVISION >= 1
 static void GFScene_CreatePresentsSprite(void)
 {
     int i;
     for (i = 0; i < 2; i++)
         gSprites[CreateSprite(&sSpriteTemplate_Presents, 104 + 32 * i, 108, 5)].oam.tileNum += i * 4;
 }
-#endif
 
 #define tState  data[0]
 #define tTimer  data[1]

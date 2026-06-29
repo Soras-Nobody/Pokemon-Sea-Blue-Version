@@ -603,13 +603,20 @@ static void BuyMenuPrintPriceInList(u8 windowId, u32 item, u8 y)
 
     if (item != INDEX_CANCEL)
     {
-        ConvertIntToDecimalStringN(gStringVar1, ItemId_GetPrice(item), 0, 4);
-        x = 4 - StringLength(gStringVar1);
-        loc = gStringVar4;
-        while (x-- != 0)
-            *loc++ = 0;
-        StringExpandPlaceholders(loc, gText_PokedollarVar1);
-        BuyMenuPrint(windowId, FONT_SMALL, gStringVar4, 0x69, y, 0, 0, TEXT_SKIP_DRAW, 1);
+        if (sShopData.martType == MART_TYPE_TMHM && CheckBagHasItem(item, 1))
+        {
+            BuyMenuPrint(windowId, FONT_SMALL, gText_SoldOut, 94, y, 0, 0, TEXT_SKIP_DRAW, 1);
+        }
+        else
+        {
+            ConvertIntToDecimalStringN(gStringVar1, ItemId_GetPrice(item), 0, 4);
+            x = 4 - StringLength(gStringVar1);
+            loc = gStringVar4;
+            while (x-- != 0)
+                *loc++ = 0;
+            StringExpandPlaceholders(loc, gText_PokedollarVar1);
+            BuyMenuPrint(windowId, FONT_SMALL, gStringVar4, 0x69, y, 0, 0, TEXT_SKIP_DRAW, 1);
+        }
     }
 }
 
@@ -892,7 +899,11 @@ static void Task_BuyMenu(u8 taskId)
             BuyMenuPrintCursor(tListTaskId, 2);
             RecolorItemDescriptionBox(1);
             sShopData.itemPrice = ItemId_GetPrice(itemId);
-            if (!IsEnoughMoney(&gSaveBlock1Ptr->money, sShopData.itemPrice))
+            if (sShopData.martType == MART_TYPE_TMHM && BagGetQuantityByItemId(itemId) > 0)
+            {
+                BuyMenuDisplayMessage(taskId, gText_SoldOutMessage, BuyMenuReturnToItemList);
+            }
+            else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, sShopData.itemPrice))
             {
                 BuyMenuDisplayMessage(taskId, gText_YouDontHaveMoney, BuyMenuReturnToItemList);
             }
@@ -920,7 +931,7 @@ static void Task_BuyHowManyDialogueInit(u8 taskId)
     BuyMenuQuantityBoxNormalBorder(3, 0);
     BuyMenuPrintItemQuantityAndPrice(taskId);
     ScheduleBgCopyTilemapToVram(0);
-    maxQuantity = GetMoney(&gSaveBlock1Ptr->money) / ItemId_GetPrice(tItemId);
+    maxQuantity = (sShopData.martType == MART_TYPE_TMHM) ? 1 : GetMoney(&gSaveBlock1Ptr->money) / ItemId_GetPrice(tItemId);
     if (maxQuantity > 99)
         sShopData.maxQuantity = 99;
     else
@@ -997,6 +1008,8 @@ static void BuyMenuSubtractMoney(u8 taskId)
     IncrementGameStat(GAME_STAT_SHOPPED);
     RemoveMoney(&gSaveBlock1Ptr->money, sShopData.itemPrice);
     PlaySE(SE_SHOP);
+    DestroyListMenuTask(gTasks[taskId].tListTaskId, &sShopData.scrollOffset, &sShopData.selectedRow);
+    gTasks[taskId].tListTaskId = ListMenuInit(&gMultiuseListMenuTemplate, sShopData.scrollOffset, sShopData.selectedRow);
     PrintMoneyAmountInMoneyBox(0, GetMoney(&gSaveBlock1Ptr->money), 0);
     gTasks[taskId].func = Task_ReturnToItemListAfterItemPurchase;
 }

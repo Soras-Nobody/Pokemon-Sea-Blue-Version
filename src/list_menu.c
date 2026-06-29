@@ -106,10 +106,12 @@ u32 DoMysteryGiftListMenu(const struct WindowTemplate *windowTemplate, const str
         sMysteryGiftLinkMenu.currItemId = ListMenu_ProcessInput(sMysteryGiftLinkMenu.listTaskId);
         if (JOY_NEW(A_BUTTON))
         {
+            PlaySE(SE_DEX_SCROLL);
             sMysteryGiftLinkMenu.state = 2;
         }
         if (JOY_NEW(B_BUTTON))
         {
+            PlaySE(SE_DEX_SCROLL);
             sMysteryGiftLinkMenu.currItemId = LIST_CANCEL;
             sMysteryGiftLinkMenu.state = 2;
         }

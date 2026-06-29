@@ -35,17 +35,13 @@ endif
 # we can't unconditionally use arm-none-eabi-cpp
 # as installations which install binutils-arm-none-eabi
 # don't come with it
-ifneq ($(MODERN),1)
-  ifeq ($(shell uname -s),Darwin)
-    CPP := $(PREFIX)cpp
-  else
-    CPP := $(CC) -E
-  endif
-else
+ifeq ($(shell uname -s),Darwin)
   CPP := $(PREFIX)cpp
+else
+  CPP := $(CC) -E
 endif
 
-ROM := poke$(BUILD_NAME).gba
+ROM := Pokemon$(BUILD_NAME).gba
 OBJ_DIR := $(BUILD_DIR)/$(BUILD_NAME)
 
 ELF := $(ROM:.gba=.elf)
@@ -77,27 +73,11 @@ INCLUDE_SCANINC_ARGS := $(INCLUDE_DIRS:%=-I %)
 
 O_LEVEL ?= 2
 CPPFLAGS := $(INCLUDE_CPP_ARGS) -Wno-trigraphs -D$(GAME_VERSION) -DREVISION=$(GAME_REVISION) -D$(GAME_LANGUAGE) -DMODERN=$(MODERN)
-ifeq ($(MODERN),0)
-  CPPFLAGS += -I tools/agbcc/include -I tools/agbcc -nostdinc -undef -std=gnu89
-  CC1 := tools/agbcc/bin/agbcc$(EXE)
-  override CFLAGS += -mthumb-interwork -Wimplicit -Wparentheses -Werror -O$(O_LEVEL) -fhex-asm
-  LIBPATH := -L ../../tools/agbcc/lib
-  LIB := $(LIBPATH) -lgcc -lc
-else
-  # Note: The makefile must be set up to not call these if modern == 0
-  MODERNCC := $(PREFIX)gcc
-  PATH_MODERNCC := PATH="$(PATH)" $(MODERNCC)
-  CC1 := $(shell $(PATH_MODERNCC) --print-prog-name=cc1) -quiet
-  override CFLAGS += -mthumb -mthumb-interwork -O$(O_LEVEL) -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast
-  LIBPATH := -L $(shell dirname $(shell $(PATH_MODERNCC) -print-file-name=libgcc.a)) -L $(shell dirname $(shell $(PATH_MODERNCC) -print-file-name=libc.a))
-  LIB := $(LIBPATH) -lc -lgcc
-  ifneq ($(DEVKITARM),)
-    ifeq ($(TOOLCHAIN),$(DEVKITARM))
-      LIB += -lsysbase -lc
-    endif
-  endif
-  LIB += -lnosys
-endif
+CPPFLAGS += -I tools/agbcc/include -I tools/agbcc -nostdinc -undef -std=gnu89
+CC1 := tools/agbcc/bin/agbcc$(EXE)
+override CFLAGS += -mthumb-interwork -Wimplicit -Wparentheses -Werror -O$(O_LEVEL) -fhex-asm
+LIBPATH := -L ../../tools/agbcc/lib
+LIB := $(LIBPATH) -lgcc -lc
 # Enable debug info if set
 ifeq ($(DINFO),1)
   override CFLAGS += -g
@@ -129,11 +109,10 @@ MAKEFLAGS += --no-print-directory
 # Delete files that weren't built properly
 .DELETE_ON_ERROR:
 
-ALL_BUILDS := firered firered_rev1 firered_rev10 leafgreen leafgreen_rev1 leafgreen_rev10
-ALL_BUILDS += $(ALL_BUILDS:%=%_modern)
+ALL_BUILDS := SeaBlueVersion
 
 RULES_NO_SCAN += clean clean-assets tidy generated clean-generated
-.PHONY: all rom modern compare $(ALL_BUILDS) $(ALL_BUILDS:%=compare_%)
+.PHONY: all rom $(ALL_BUILDS)
 .PHONY: $(RULES_NO_SCAN)
 
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
@@ -195,17 +174,16 @@ OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 SUBDIRS  := $(sort $(dir $(OBJS)))
 $(shell mkdir -p $(SUBDIRS))
 
-# Pretend rules that are actually flags defer to `make all`
-modern: all
-compare: all
-
 # Other rules
 rom: $(ROM)
-ifeq ($(COMPARE),1)
-	@$(SHA1) $(BUILD_NAME).sha1
-endif
 
 syms: $(SYM)
+
+.PHONY: remake
+
+remake:
+	@$(MAKE) clean
+	@$(MAKE)
 
 clean: tidy clean-tools clean-generated clean-assets
 
@@ -218,28 +196,11 @@ clean-assets:
 	find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
 
 tidy:
-	$(RM) $(ALL_BUILDS:%=poke%{.gba,.elf,.map})
+	$(RM) $(ALL_BUILDS:%=Pokemon%{.gba,.elf,.map,.sym})
 	$(RM) -r $(BUILD_DIR)
 
 # "friendly" target names for convenience sake
-firered:                ; @$(MAKE) GAME_VERSION=FIRERED
-firered_rev1:           ; @$(MAKE) GAME_VERSION=FIRERED GAME_REVISION=1
-firered_switch:          ; @$(MAKE) GAME_VERSION=FIRERED GAME_REVISION=10
-leafgreen:              ; @$(MAKE) GAME_VERSION=LEAFGREEN
-leafgreen_rev1:         ; @$(MAKE) GAME_VERSION=LEAFGREEN GAME_REVISION=1
-leafgreen_switch:        ; @$(MAKE) GAME_VERSION=LEAFGREEN GAME_REVISION=10
-
-compare_firered:        ; @$(MAKE) GAME_VERSION=FIRERED COMPARE=1
-compare_firered_rev1:   ; @$(MAKE) GAME_VERSION=FIRERED GAME_REVISION=1 COMPARE=1
-compare_firered_switch: ; @$(MAKE) GAME_VERSION=FIRERED GAME_REVISION=10 COMPARE=1
-compare_leafgreen:      ; @$(MAKE) GAME_VERSION=LEAFGREEN COMPARE=1
-compare_leafgreen_rev1: ; @$(MAKE) GAME_VERSION=LEAFGREEN GAME_REVISION=1 COMPARE=1
-compare_leafgreen_switch:; @$(MAKE) GAME_VERSION=LEAFGREEN GAME_REVISION=10 COMPARE=1
-
-firered_modern:        ; @$(MAKE) GAME_VERSION=FIRERED MODERN=1
-firered_rev1_modern:   ; @$(MAKE) GAME_VERSION=FIRERED GAME_REVISION=1 MODERN=1
-leafgreen_modern:      ; @$(MAKE) GAME_VERSION=LEAFGREEN MODERN=1
-leafgreen_rev1_modern: ; @$(MAKE) GAME_VERSION=LEAFGREEN GAME_REVISION=1 MODERN=1
+seablue:                ; @$(MAKE) GAME_VERSION=FIRERED
 
 # Other rules
 include graphics_file_rules.mk
@@ -271,7 +232,6 @@ clean-generated:
 	@rm -f $(AUTO_GEN_TARGETS)
 	@echo "rm -f <AUTO_GEN_TARGETS>"
 
-ifeq ($(MODERN),0)
 $(C_BUILDDIR)/agb_flash.o: CFLAGS := -O -mthumb-interwork
 $(C_BUILDDIR)/agb_flash_1m.o: CFLAGS := -O -mthumb-interwork
 $(C_BUILDDIR)/agb_flash_mx.o: CFLAGS := -O -mthumb-interwork
@@ -286,14 +246,6 @@ $(C_BUILDDIR)/battle_anim_flying.o: CFLAGS += -ffreestanding
 
 $(C_BUILDDIR)/librfu_intr.o: CC1 := $(TOOLS_DIR)/agbcc/bin/agbcc_arm$(EXE)
 $(C_BUILDDIR)/librfu_intr.o: CFLAGS := -O2 -mthumb-interwork -quiet
-else
-$(C_BUILDDIR)/berry_crush_2.o: CFLAGS += -Wno-address-of-packed-member
-$(C_BUILDDIR)/berry_crush_3.o: CFLAGS += -Wno-address-of-packed-member
-$(C_BUILDDIR)/braille_text.o: CFLAGS += -Wno-address-of-packed-member
-$(C_BUILDDIR)/text.o: CFLAGS += -Wno-address-of-packed-member
-$(C_BUILDDIR)/battle_tower.o: CFLAGS += -Wno-div-by-zero
-$(C_BUILDDIR)/librfu_intr.o: override CFLAGS += -marm -mthumb-interwork -O2 -mtune=arm7tdmi -march=armv4t -mabi=apcs-gnu -fno-toplevel-reorder -fno-aggressive-loop-optimizations -Wno-pointer-to-int-cast
-endif
 
 # Dependency rules (for the *.c & *.s sources to .o files)
 # Have to be explicit or else missing files won't be reported.
@@ -302,15 +254,8 @@ endif
 # It doesn't look like $(shell) can be deferred so there might not be a better way (Icedude_907: there is soon).
 
 $(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.c
-ifneq ($(KEEP_TEMPS),1)
 	@echo "$(CC1) <flags> -o $@ $<"
 	@$(CPP) $(CPPFLAGS) $< | $(PREPROC) -i $< charmap.txt | $(CC1) $(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $(AS) $(ASFLAGS) -o $@ -
-else
-	@$(CPP) $(CPPFLAGS) $< -o $(C_BUILDDIR)/$*.i
-	@$(PREPROC) $(C_BUILDDIR)/$*.i charmap.txt | $(CC1) $(CFLAGS) -o $(C_BUILDDIR)/$*.s
-	@echo -e ".text\n\t.align\t2, 0\n" >> $(C_BUILDDIR)/$*.s
-	$(AS) $(ASFLAGS) -o $@ $(C_BUILDDIR)/$*.s
-endif
 
 $(C_BUILDDIR)/%.d: $(C_SUBDIR)/%.c
 	$(SCANINC) -M $@ $(INCLUDE_SCANINC_ARGS) -I tools/agbcc/include $<
@@ -352,34 +297,15 @@ endif
 $(OBJ_DIR)/sym_bss.ld: sym_bss.txt
 	$(RAMSCRGEN) .bss $< ENGLISH > $@
 
-$(OBJ_DIR)/sym_bss_rev10.ld: sym_bss_rev10.txt
-	$(RAMSCRGEN) .bss $< ENGLISH > $@
-
 $(OBJ_DIR)/sym_common.ld: sym_common.txt $(C_OBJS) $(wildcard common_syms/*.txt)
-	$(RAMSCRGEN) COMMON $< ENGLISH -c $(C_BUILDDIR),common_syms > $@
-
-$(OBJ_DIR)/sym_common_rev10.ld: sym_common_rev10.txt $(C_OBJS) $(wildcard common_syms/*.txt)
 	$(RAMSCRGEN) COMMON $< ENGLISH -c $(C_BUILDDIR),common_syms > $@
 
 $(OBJ_DIR)/sym_ewram.ld: sym_ewram.txt
 	$(RAMSCRGEN) ewram_data $< ENGLISH > $@
 
-$(OBJ_DIR)/sym_ewram_rev10.ld: sym_ewram_rev10.txt
-	$(RAMSCRGEN) ewram_data $< ENGLISH > $@
-
 # Linker script
-ifeq ($(MODERN),0)
-ifeq ($(GAME_REVISION),10)
-LD_SCRIPT := ld_script_rev10.ld
-LD_SCRIPT_DEPS := $(OBJ_DIR)/sym_bss_rev10.ld $(OBJ_DIR)/sym_common_rev10.ld $(OBJ_DIR)/sym_ewram_rev10.ld
-else
 LD_SCRIPT := ld_script.ld
 LD_SCRIPT_DEPS := $(OBJ_DIR)/sym_bss.ld $(OBJ_DIR)/sym_common.ld $(OBJ_DIR)/sym_ewram.ld
-endif
-else
-LD_SCRIPT := ld_script_modern.ld
-LD_SCRIPT_DEPS :=
-endif
 
 # Final rules
 
@@ -393,7 +319,4 @@ $(ELF): $(LD_SCRIPT) $(LD_SCRIPT_DEPS) $(OBJS)
 # Builds the rom from the elf file
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary --gap-fill 0xFF --pad-to 0x9000000 $< $@
-
-# Symbol file (`make syms`)
-$(SYM): $(ELF)
-	$(OBJDUMP) -t $< | sort -u | grep -E "^0[2389]" | $(PERL) -p -e 's/^(\w{8}) (\w).{6} \S+\t(\w{8}) (\S+)$$/\1 \2 \3 \4/g' > $@
+	$(OBJDUMP) -t $< | sort -u | grep -E "^0[2389]" | $(PERL) -p -e 's/^(\w{8}) (\w).{6} \S+\t(\w{8}) (\S+)$$/\1 \2 \3 \4/g' > $(SYM)
