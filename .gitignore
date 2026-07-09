@@ -69,3 +69,6 @@ CMakeLists.txt
 compile_commands.json
 *.toml
 *.ss*
+.AddCompLib/
+.porydaw/
+cd.txt

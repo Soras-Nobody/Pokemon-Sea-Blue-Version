@@ -98,7 +98,6 @@ MAPJSON   := $(TOOLS_DIR)/mapjson/mapjson$(EXE)
 JSONPROC  := $(TOOLS_DIR)/jsonproc/jsonproc$(EXE)
 
 PERL := perl
-SHA1 := $(shell { command -v sha1sum || command -v shasum; } 2>/dev/null) -c
 
 MAKEFLAGS += --no-print-directory
 

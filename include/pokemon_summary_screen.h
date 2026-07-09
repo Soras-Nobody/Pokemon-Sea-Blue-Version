@@ -49,10 +49,22 @@ enum PokemonSummaryScreenState3270
 
 enum PokemonSummaryScreenStat
 {
+    PSS_STAT_HP_EV,
+    PSS_STAT_HP_IV,
+    PSS_STAT_ATK_EV,
+    PSS_STAT_ATK_IV,
     PSS_STAT_ATK,
+    PSS_STAT_DEF_EV,
+    PSS_STAT_DEF_IV,
     PSS_STAT_DEF,
+    PSS_STAT_SPA_EV,
+    PSS_STAT_SPA_IV,
     PSS_STAT_SPA,
+    PSS_STAT_SPD_EV,
+    PSS_STAT_SPD_IV,
     PSS_STAT_SPD,
+    PSS_STAT_SPE_EV,
+    PSS_STAT_SPE_IV,
     PSS_STAT_SPE
 };
 

@@ -173,7 +173,7 @@ struct PokemonSummaryScreenData
         u8 ALIGNED(4) genderSymbolStrBuf[3];
         u8 ALIGNED(4) levelStrBuf[7];
         u8 ALIGNED(4) curHpStrBuf[9];
-        u8 ALIGNED(4) statValueStrBufs[5][5];
+        u8 ALIGNED(4) statValueStrBufs[17][5];
 
         u8 ALIGNED(4) moveCurPpStrBufs[5][11];
         u8 ALIGNED(4) moveMaxPpStrBufs[5][11];
@@ -247,12 +247,31 @@ struct PokemonSummaryScreenData
 struct Struct203B144
 {
     u16 unk00;
+
+    u16 hpEvStr;
+    u16 hpIvStr;
     u16 curHpStr;
+
+    u16 atkEvStr;
+    u16 atkIvStr;
     u16 atkStr;
+
+    u16 defEvStr;
+    u16 defIvStr;
     u16 defStr;
+
+    u16 spAEvStr;
+    u16 spAIvStr;
     u16 spAStr;
+
+    u16 spDEvStr;
+    u16 spDIvStr;
     u16 spDStr;
+
+    u16 speEvStr;
+    u16 speIvStr;
     u16 speStr;
+
     u16 expStr;
     u16 toNextLevel;
 
@@ -914,6 +933,8 @@ static const u8 sLevelNickTextColors[][3] =
     {0, 5, 4},
     {0, 2, 3},
     {0, 11, 10},
+    {0, 1, 10},
+    {0, 7, 10},
 };
 
 static const u8 ALIGNED(4) sMultiBattlePartyOrder[] =
@@ -1546,7 +1567,7 @@ static void PokeSum_SetHpExpBarCoordsFullLeft(void)
     u8 i;
     for (i = 0; i < 11; i++)
     {
-        sExpBarObjs->xpos[i] = (8 * i) + 156;
+        sExpBarObjs->xpos[i] = (8 * i) + 159;
         sExpBarObjs->sprites[i]->x = sExpBarObjs->xpos[i];
         if (i >= 9)
             continue;
@@ -2147,6 +2168,8 @@ static void BufferMonInfo(void)
 
 #define GetNumberRightAlign63(x) (63 - StringLength((x)) * 6)
 #define GetNumberRightAlign27(x) (27 - StringLength((x)) * 6)
+#define GetNumberRightAlign24Small(x) (24 - StringLength((x)) * 5)
+#define GetNumberRightAlign16Small(x) (16 - StringLength((x)) * 5)
 
 static void BufferMonSkills(void)
 {
@@ -2193,22 +2216,59 @@ static void BufferMonSkills(void)
     }
     else
     {
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_HP_EV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_HP_EV], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
+        sMonSkillsPrinterXpos->hpEvStr = GetNumberRightAlign24Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_HP_EV]);
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_HP_IV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_HP_IV], statValue, STR_CONV_MODE_LEFT_ALIGN, 2);
+        sMonSkillsPrinterXpos->hpIvStr = GetNumberRightAlign16Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_HP_IV]);
+
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_ATK_EV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK_EV], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
+        sMonSkillsPrinterXpos->atkEvStr = GetNumberRightAlign24Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK_EV]);
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_ATK_IV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK_IV], statValue, STR_CONV_MODE_LEFT_ALIGN, 2);
+        sMonSkillsPrinterXpos->atkIvStr = GetNumberRightAlign16Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK_IV]);
         statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_ATK);
         ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
         sMonSkillsPrinterXpos->atkStr = GetNumberRightAlign27(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK]);
 
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_DEF_EV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF_EV], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
+        sMonSkillsPrinterXpos->defEvStr = GetNumberRightAlign24Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF_EV]);
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_DEF_IV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF_IV], statValue, STR_CONV_MODE_LEFT_ALIGN, 2);
+        sMonSkillsPrinterXpos->defIvStr = GetNumberRightAlign16Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF_IV]);
         statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_DEF);
         ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
         sMonSkillsPrinterXpos->defStr = GetNumberRightAlign27(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF]);
 
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPATK_EV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA_EV], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
+        sMonSkillsPrinterXpos->spAEvStr = GetNumberRightAlign24Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA_EV]);
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPATK_IV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA_IV], statValue, STR_CONV_MODE_LEFT_ALIGN, 2);
+        sMonSkillsPrinterXpos->spAIvStr = GetNumberRightAlign16Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA_IV]);
         statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPATK);
         ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
         sMonSkillsPrinterXpos->spAStr = GetNumberRightAlign27(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA]);
 
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPDEF_EV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD_EV], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
+        sMonSkillsPrinterXpos->spDEvStr = GetNumberRightAlign24Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD_EV]);
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPDEF_IV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD_IV], statValue, STR_CONV_MODE_LEFT_ALIGN, 2);
+        sMonSkillsPrinterXpos->spDIvStr = GetNumberRightAlign16Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD_IV]);
         statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPDEF);
         ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
         sMonSkillsPrinterXpos->spDStr = GetNumberRightAlign27(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD]);
 
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPEED_EV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE_EV], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
+        sMonSkillsPrinterXpos->speEvStr = GetNumberRightAlign24Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE_EV]);
+        statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPEED_IV);
+        ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE_IV], statValue, STR_CONV_MODE_LEFT_ALIGN, 2);
+        sMonSkillsPrinterXpos->speIvStr = GetNumberRightAlign16Small(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE_IV]);
         statValue = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPEED);
         ConvertIntToDecimalStringN(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE], statValue, STR_CONV_MODE_LEFT_ALIGN, 3);
         sMonSkillsPrinterXpos->speStr = GetNumberRightAlign27(sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE]);
@@ -2496,16 +2556,43 @@ static void PrintInfoPage(void)
     }
 }
 
+static u8 GetNatureStatColorIndex(u8 nature, u8 statIndex)
+{
+    s8 mod = GetNatureStatModifier(nature, statIndex);
+    if (mod > 0)
+        return 6; // red - boosted
+    if (mod < 0)
+        return 7; // blue - lowered
+    return 0;     // neutral
+}
+
 static void PrintSkillsPage(void)
 {
-    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 14 + sMonSkillsPrinterXpos->curHpStr, 4, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.curHpStrBuf);
-    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->atkStr, 22, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK]);
-    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->defStr, 35, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF]);
-    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->spAStr, 48, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA]);
-    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->spDStr, 61, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD]);
-    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->speStr, 74, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE]);
-    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 15 + sMonSkillsPrinterXpos->expStr, 87, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.expPointsStrBuf);
-    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 15 + sMonSkillsPrinterXpos->toNextLevel, 100, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.expToNextLevelStrBuf);
+    u8 nature = GetNature(&sMonSummaryScreen->currentMon);
+
+    if (sMonSummaryScreen->isEnemyParty == FALSE)
+    {
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, -9 + sMonSkillsPrinterXpos->hpEvStr,   3, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_HP_EV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, 14 + sMonSkillsPrinterXpos->hpIvStr,   3, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_HP_IV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, -9 + sMonSkillsPrinterXpos->atkEvStr, 21, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK_EV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, 14 + sMonSkillsPrinterXpos->atkIvStr, 21, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK_IV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, -9 + sMonSkillsPrinterXpos->defEvStr, 34, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF_EV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, 14 + sMonSkillsPrinterXpos->defIvStr, 34, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF_IV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, -9 + sMonSkillsPrinterXpos->spAEvStr, 47, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA_EV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, 14 + sMonSkillsPrinterXpos->spAIvStr, 47, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA_IV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, -9 + sMonSkillsPrinterXpos->spDEvStr, 60, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD_EV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, 14 + sMonSkillsPrinterXpos->spDIvStr, 60, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD_IV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, -9 + sMonSkillsPrinterXpos->speEvStr, 73, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE_EV]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_SMALL, 14 + sMonSkillsPrinterXpos->speIvStr, 73, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE_IV]);
+    }
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 14 + sMonSkillsPrinterXpos->curHpStr,     4, sLevelNickTextColors[0],                                           TEXT_SKIP_DRAW, sMonSummaryScreen->summary.curHpStrBuf);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->atkStr,      22, sLevelNickTextColors[GetNatureStatColorIndex(nature, STAT_ATK)],   TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_ATK]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->defStr,      35, sLevelNickTextColors[GetNatureStatColorIndex(nature, STAT_DEF)],   TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_DEF]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->spAStr,      48, sLevelNickTextColors[GetNatureStatColorIndex(nature, STAT_SPATK)], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPA]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->spDStr,      61, sLevelNickTextColors[GetNatureStatColorIndex(nature, STAT_SPDEF)], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPD]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 50 + sMonSkillsPrinterXpos->speStr,      74, sLevelNickTextColors[GetNatureStatColorIndex(nature, STAT_SPEED)], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.statValueStrBufs[PSS_STAT_SPE]);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 15 + sMonSkillsPrinterXpos->expStr,      87, sLevelNickTextColors[0],                                           TEXT_SKIP_DRAW, sMonSummaryScreen->summary.expPointsStrBuf);
+    AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_RIGHT_PANE], FONT_NORMAL, 15 + sMonSkillsPrinterXpos->toNextLevel, 99, sLevelNickTextColors[0],                                           TEXT_SKIP_DRAW, sMonSummaryScreen->summary.expToNextLevelStrBuf);
 }
 
 #define GetMoveNamePrinterYpos(x) ((x) * 28 + 5)
@@ -2847,7 +2934,7 @@ static void PokeSum_PrintExpPoints_NextLv(void)
                                  gText_PokeSum_ExpPoints);
 
     AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_TRAINER_MEMO], FONT_NORMAL,
-                                 26, 20,
+                                 26, 19,
                                  sLevelNickTextColors[0], TEXT_SKIP_DRAW,
                                  gText_PokeSum_NextLv);
 }
@@ -2900,10 +2987,10 @@ static void PokeSum_PrintAbilityNameAndDesc(void)
     FillWindowPixelBuffer(sMonSummaryScreen->windowIds[5], 0);
 
     AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[5], FONT_NORMAL,
-                                 66, 1, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.abilityNameStrBuf);
+                                 66, 0, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.abilityNameStrBuf);
 
     AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[5], FONT_NORMAL,
-                                 2, 15, sLevelNickTextColors[0], TEXT_SKIP_DRAW,
+                                 2, 13, sLevelNickTextColors[0], TEXT_SKIP_DRAW,
                                  sMonSummaryScreen->summary.abilityDescStrBuf);
 
 }
@@ -3030,12 +3117,12 @@ static void PokeSum_FlipPages_SlideHpExpBarsIn(void)
 
     for (i = 0; i < 11; i++)
     {
-        if (sExpBarObjs->xpos[i] > 156 + (8 * i))
+        if (sExpBarObjs->xpos[i] > 159 + (8 * i))
         {
             sExpBarObjs->xpos[i] -= 60;
 
-            if (sExpBarObjs->xpos[i] < 156 + (8 * i))
-                sExpBarObjs->xpos[i] = 156 + (8 * i);
+            if (sExpBarObjs->xpos[i] < 159 + (8 * i))
+                sExpBarObjs->xpos[i] = 159 + (8 * i);
 
             sExpBarObjs->sprites[i]->x = sExpBarObjs->xpos[i];
         }
@@ -4584,7 +4671,7 @@ static void CreateExpBarObjs(u16 tileTag, u16 palTag)
             .callback = SpriteCallbackDummy,
         };
 
-        sExpBarObjs->xpos[i] = i * 8 + 156;
+        sExpBarObjs->xpos[i] = i * 8 + 159;
         spriteId = CreateSprite(&template, sExpBarObjs->xpos[i], 132, 0);
         sExpBarObjs->sprites[i] = &gSprites[spriteId];
         sExpBarObjs->sprites[i]->oam.priority = 2;

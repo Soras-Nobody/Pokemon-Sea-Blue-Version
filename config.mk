@@ -6,10 +6,6 @@ GAME_LANGUAGE := ENGLISH
 
 # Builds the ROM using a modern compiler
 MODERN        := 0
-# Compares the ROM to a checksum of the original - only makes sense using when non-modern
-COMPARE       := 0
-
-KEEP_TEMPS    := 0
 
 # For gbafix
 MAKER_CODE := 01

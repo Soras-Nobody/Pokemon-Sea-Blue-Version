@@ -67,6 +67,7 @@ static union PokemonSubstruct *GetSubstruct(struct BoxPokemon *boxMon, u32 perso
 static u16 GetDeoxysStat(struct Pokemon *mon, s32 statId);
 static bool8 IsShinyOtIdPersonality(u32 otId, u32 personality);
 static u16 ModifyStatByNature(u8 nature, u16 n, u8 statIndex);
+const s8 GetNatureStatModifier(u8 nature, u8 statIndex);
 static u8 GetNatureFromPersonality(u32 personality);
 static bool8 PartyMonHasStatus(struct Pokemon *mon, u32 unused, u32 healMask, u8 battleId);
 static bool8 HealStatusConditions(struct Pokemon *mon, u32 unused, u32 healMask, u8 battleId);
@@ -5435,6 +5436,11 @@ static u16 ModifyStatByNature(u8 nature, u16 stat, u8 statIndex)
     }
 
     return retVal;
+}
+
+const s8 GetNatureStatModifier(u8 nature, u8 statIndex)
+{
+    return sNatureStatTable[nature][statIndex - 1];
 }
 
 void AdjustFriendship(struct Pokemon *mon, u8 event)
