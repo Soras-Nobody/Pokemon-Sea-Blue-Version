@@ -25,6 +25,7 @@
 #include "graphics.h"
 #include "constants/songs.h"
 #include "constants/maps.h"
+#include "blend_palette.h"
 
 #define HALL_OF_FAME_MAX_TEAMS 50
 #define HALL_OF_FAME_BG_PAL    RGB(22, 24, 29)
@@ -509,6 +510,9 @@ static void Task_Hof_DisplayMon(u8 taskId)
     }
 
     spriteId = CreateMonPicSprite_HandleDeoxys(currMon->species, currMon->tid, currMon->personality, 1, srcX, srcY, currMonId, 0xFFFF);
+
+    BlendMonPalette(currMon->personality, OBJ_PLTT_ID(gSprites[spriteId].oam.paletteNum), FALSE);
+
     gSprites[spriteId].data[1] = dstX;
     gSprites[spriteId].data[2] = dstY;
     gSprites[spriteId].data[0] = 0;
@@ -828,6 +832,9 @@ static void Task_HofPC_DrawSpritesPrintText(u8 taskId)
 
             spriteId = CreateMonPicSprite_HandleDeoxys(currMon->species, currMon->tid, currMon->personality, TRUE, posX,
                                                        posY, i, 0xFFFF);
+
+            BlendMonPalette(currMon->personality, OBJ_PLTT_ID(gSprites[spriteId].oam.paletteNum), FALSE);
+
             gSprites[spriteId].oam.priority = 1;
             gTasks[taskId].data[5 + i] = spriteId;
         }

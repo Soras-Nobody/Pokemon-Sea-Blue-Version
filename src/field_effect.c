@@ -28,6 +28,7 @@
 #include "constants/metatile_behaviors.h"
 #include "constants/songs.h"
 #include "constants/sound.h"
+#include "blend_palette.h"
 
 extern struct CompressedSpritePalette gMonPaletteTable[]; // Intentionally declared (incorrectly) without const in order to match
 extern const struct CompressedSpritePalette gTrainerFrontPicPaletteTable[];
@@ -619,7 +620,11 @@ static u8 CreateMonSprite_FieldMove(u16 species, u32 otId, u32 personality, s16 
 {
     const struct CompressedSpritePalette * spritePalette = GetMonSpritePalStructFromOtIdPersonality(species, otId, personality);
     u16 spriteId = CreateMonPicSprite_HandleDeoxys(species, otId, personality, 1, x, y, 0, spritePalette->tag);
-    PreservePaletteInWeather(IndexOfSpritePaletteTag(spritePalette->tag) + 0x10);
+    
+    u16 paletteNum = IndexOfSpritePaletteTag(spritePalette->tag);
+    BlendMonPalette(personality, OBJ_PLTT_ID(paletteNum), FALSE);
+    PreservePaletteInWeather(paletteNum + 0x10);
+
     if (spriteId == 0xFFFF)
         return MAX_SPRITES;
     else

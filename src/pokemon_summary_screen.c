@@ -34,6 +34,7 @@
 #include "mon_markings.h"
 #include "pokemon_storage_system.h"
 #include "constants/sound.h"
+#include "blend_palette.h"
 
 // needs conflicting header to match (curIndex is s8 in the function, but has to be defined as u8 here)
 extern s16 SeekToNextMonInBox(struct BoxPokemon * boxMons, u8 curIndex, u8 maxIndex, u8 flags);
@@ -2934,7 +2935,7 @@ static void PokeSum_PrintExpPoints_NextLv(void)
                                  gText_PokeSum_ExpPoints);
 
     AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[POKESUM_WIN_TRAINER_MEMO], FONT_NORMAL,
-                                 26, 19,
+                                 26, 18,
                                  sLevelNickTextColors[0], TEXT_SKIP_DRAW,
                                  gText_PokeSum_NextLv);
 }
@@ -2990,7 +2991,7 @@ static void PokeSum_PrintAbilityNameAndDesc(void)
                                  66, 0, sLevelNickTextColors[0], TEXT_SKIP_DRAW, sMonSummaryScreen->summary.abilityNameStrBuf);
 
     AddTextPrinterParameterized3(sMonSummaryScreen->windowIds[5], FONT_NORMAL,
-                                 2, 13, sLevelNickTextColors[0], TEXT_SKIP_DRAW,
+                                 2, 12, sLevelNickTextColors[0], TEXT_SKIP_DRAW,
                                  sMonSummaryScreen->summary.abilityDescStrBuf);
 
 }
@@ -4120,6 +4121,8 @@ static void PokeSum_CreateMonPicSprite(void)
     }
 
     FreeSpriteOamMatrix(&gSprites[spriteId]);
+
+    BlendMonPalette(personality, OBJ_PLTT_ID(gSprites[spriteId].oam.paletteNum), FALSE);
 
     if (!IsMonSpriteNotFlipped(species))
         gSprites[spriteId].hFlip = TRUE;

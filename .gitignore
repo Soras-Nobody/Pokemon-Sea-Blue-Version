@@ -62,7 +62,6 @@ porymap.*.cfg
 prefabs.json
 .vscode/*.*
 *.js
-*.sym
 build-cmake-*/
 .cache/
 CMakeLists.txt

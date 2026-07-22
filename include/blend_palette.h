@@ -11,5 +11,6 @@
 
 void BlendPalette(u16, u16, u8, u16);
 void BlendPalettesAt(u16 * palbuff, u16 blend_pal, u32 coefficient, s32 size);
+void BlendMonPalette(u32 personality, u16 paletteOffset, bool8 random);
 
 #endif //GUARD_BLEND_PALETTE_H

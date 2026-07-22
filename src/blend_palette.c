@@ -1,6 +1,39 @@
 #include "global.h"
 #include "blend_palette.h"
 #include "palette.h"
+#include "random.h"
+
+static const u16 sBlendColors[] =
+{
+    RGB( 0,  0,  0),
+    RGB(31,  0,  0),
+    RGB(31, 31,  0),
+    RGB( 0, 31,  0),
+    RGB( 0, 31, 31),
+    RGB( 0,  0, 31),
+    RGB(31,  0, 31),
+    RGB(31, 31, 31),
+};
+
+void BlendMonPalette(u32 personality, u16 paletteOffset, bool8 random)
+{
+    u16 color;
+    u8 coeff;
+
+    if (random)
+    {
+        color = sBlendColors[Random() % ARRAY_COUNT(sBlendColors)];
+        coeff = Random() % 2;
+    }
+    else
+    {
+        color = sBlendColors[personality & (ARRAY_COUNT(sBlendColors) - 1)];
+        coeff = (personality >> 3) & 1;
+    }
+
+    BlendPalette(paletteOffset, 16, 8, color);
+    CpuCopy32(&gPlttBufferFaded[paletteOffset], &gPlttBufferUnfaded[paletteOffset], PLTT_SIZE_4BPP);
+}
 
 void BlendPalette(u16 palOffset, u16 numEntries, u8 coeff, u16 blendColor)
 {

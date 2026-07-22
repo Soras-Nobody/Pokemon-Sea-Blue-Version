@@ -36,6 +36,7 @@
 #include "constants/abilities.h"
 #include "constants/pokemon.h"
 #include "constants/maps.h"
+#include "blend_palette.h"
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 
@@ -9688,7 +9689,7 @@ static void Cmd_displaydexinfo(void)
     case 4:
         if (!IsDma3ManagerBusyWithBgCopy())
         {
-            CreateMonPicSprite_HandleDeoxys(species,
+            u16 spriteId = CreateMonPicSprite_HandleDeoxys(species,
                                             gBattleMons[B_POSITION_OPPONENT_LEFT].otId,
                                             gBattleMons[B_POSITION_OPPONENT_LEFT].personality,
                                             TRUE,
@@ -9696,6 +9697,9 @@ static void Cmd_displaydexinfo(void)
                                             64,
                                             0,
                                             0xFFFF);
+
+            BlendMonPalette(gBattleMons[B_POSITION_OPPONENT_LEFT].personality, OBJ_PLTT_ID(gSprites[spriteId].oam.paletteNum), FALSE);
+
             CpuFill32(0, gPlttBufferFaded, BG_PLTT_SIZE);
             BeginNormalPaletteFade(0x1FFFF, 0, 16, 0, RGB_BLACK);
             ShowBg(0);

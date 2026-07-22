@@ -1923,9 +1923,18 @@ static void CreateNidoranFSprite(u8 taskId)
 {
     u8 spriteId;
 
+    u8 paletteNum;
+    u32 personality = Random32();
+    u32 otId = Random32();
+    const struct CompressedSpritePalette *pal = GetMonSpritePalStructFromOtIdPersonality(INTRO_SPECIES, otId, personality);
+
     DecompressPicFromTable(&gMonFrontPicTable[INTRO_SPECIES], MonSpritesGfxManager_GetSpritePtr(0), INTRO_SPECIES);
-    LoadCompressedSpritePaletteUsingHeap(&gMonPaletteTable[INTRO_SPECIES]);
-    SetMultiuseSpriteTemplateToPokemon(INTRO_SPECIES, 0);
+
+    LoadCompressedSpritePaletteUsingHeap(pal);
+    paletteNum = IndexOfSpritePaletteTag(pal->tag);
+    BlendMonPalette(personality, OBJ_PLTT_ID(paletteNum), FALSE);
+    SetMultiuseSpriteTemplateToPokemon(pal->tag, 0);
+    
     spriteId = CreateSprite(&gMultiuseSpriteTemplate, 96, 96, 1);
     gSprites[spriteId].callback = SpriteCallbackDummy;
     gSprites[spriteId].oam.priority = 1;

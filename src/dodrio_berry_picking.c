@@ -20,6 +20,7 @@
 #include "constants/songs.h"
 #include "constants/sound.h"
 #include "constants/items.h"
+#include "blend_palette.h"
 
 // Note that in this file 'Dodrio Berry Picking' is often
 // shortened to DodrioGame or just Game for convenience
@@ -173,6 +174,7 @@ struct StatusBar
 // Pokémon is whether or not it's shiny
 struct DodrioGame_MonInfo
 {
+    u32 personality;
     bool8 isShiny;
 };
 
@@ -1459,7 +1461,7 @@ static void Task_CommunicateMonInfo(u8 taskId)
     switch (tState)
     {
     case 0:
-        SendBlock(0, &sGame->monInfo[sGame->multiplayerId].isShiny, sizeof(sGame->monInfo[sGame->multiplayerId].isShiny));
+        SendBlock(0, &sGame->monInfo[sGame->multiplayerId], sizeof(sGame->monInfo[sGame->multiplayerId]));
         sGame->playersReceived = 0;
         tState++;
         break;
@@ -1473,7 +1475,7 @@ static void Task_CommunicateMonInfo(u8 taskId)
         {
             if (blockReceivedStatus & 1)
             {
-                *(u8 *)&sGame->monInfo[i] = *(u8 *)gBlockRecvBuffer[i];
+                sGame->monInfo[i] = *(struct DodrioGame_MonInfo *)gBlockRecvBuffer[i];
                 ResetBlockReceivedFlag(i);
                 sGame->playersReceived++;
             }
@@ -1822,6 +1824,7 @@ static void VBlankCB_DodrioGame(void)
 static void InitMonInfo(struct DodrioGame_MonInfo * monInfo, struct Pokemon * mon)
 {
     monInfo->isShiny = IsMonShiny(mon);
+    monInfo->personality = GetMonData(mon, MON_DATA_PERSONALITY);
 }
 
 static void CreateTask_(TaskFunc func, u8 priority)
@@ -3585,6 +3588,8 @@ static void CreateDodrioSprite(struct DodrioGame_MonInfo * monInfo, u8 playerId,
     sDodrioSpriteIds[id] = AllocZeroed(4);
     *sDodrioSpriteIds[id] = CreateSprite(&template, GetDodrioXPos(playerId, numPlayers), 136, 3);
     SetDodrioInvisibility(TRUE, id);
+
+    BlendMonPalette(monInfo->personality, OBJ_PLTT_ID(gSprites[*sDodrioSpriteIds[id]].oam.paletteNum), FALSE);
 }
 
 #define sState   data[0]

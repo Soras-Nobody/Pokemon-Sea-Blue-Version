@@ -25,6 +25,7 @@
 #include "constants/items.h"
 #include "constants/help_system.h"
 #include "constants/songs.h"
+#include "blend_palette.h"
 
 EWRAM_DATA struct PokemonStorageSystemData *gStorage = NULL;
 static EWRAM_DATA bool8 sInPartyMenu = 0;
@@ -2278,6 +2279,9 @@ static void LoadDisplayMonGfx(u16 species, u32 personality)
         LZ77UnCompWram(gStorage->displayMonPalette, gStorage->displayMonPalBuffer);
         CpuCopy32(gStorage->tileBuffer, gStorage->displayMonTilePtr, 0x800);
         LoadPalette(gStorage->displayMonPalBuffer, gStorage->displayMonPalOffset, PLTT_SIZE_4BPP);
+
+        BlendMonPalette(personality, gStorage->displayMonPalOffset, FALSE);
+        
         gStorage->displayMonSprite->invisible = FALSE;
     }
     else

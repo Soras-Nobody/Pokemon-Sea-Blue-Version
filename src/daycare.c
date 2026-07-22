@@ -29,6 +29,7 @@
 #include "trade.h"
 #include "constants/daycare.h"
 #include "constants/region_map_sections.h"
+#include "blend_palette.h"
 
 // Combination of RSE's Day-Care (re-used on Four Island), FRLG's Day-Care, and egg_hatch.c
 
@@ -1708,6 +1709,8 @@ static u8 EggHatchCreateMonSprite(u8 a0, u8 switchID, u8 pokeID, u16 *speciesLoc
     u8 spriteID = 0; // r7
     struct Pokemon* mon = NULL; // r5
 
+    const struct CompressedSpritePalette *palette;
+
     if (a0 == 0)
     {
         mon = &gPlayerParty[pokeID];
@@ -1718,19 +1721,29 @@ static u8 EggHatchCreateMonSprite(u8 a0, u8 switchID, u8 pokeID, u16 *speciesLoc
         mon = &gPlayerParty[pokeID];
         r4 = 3;
     }
+
+    palette = GetMonSpritePalStruct(mon);
+
     switch (switchID)
     {
     case 0:
     {
+        u8 paletteNum;
+
         u16 species = GetMonData(mon, MON_DATA_SPECIES);
         u32 pid = GetMonData(mon, MON_DATA_PERSONALITY);
         HandleLoadSpecialPokePic(&gMonFrontPicTable[species], gMonSpritesGfxPtr->sprites[(a0 * 2) + 1], species, pid);
-        LoadCompressedSpritePalette(GetMonSpritePalStruct(mon));
+
+        LoadCompressedSpritePalette(palette);
+        paletteNum = IndexOfSpritePaletteTag(palette->tag);
+        BlendMonPalette(pid, OBJ_PLTT_ID(paletteNum), FALSE);
+
         *speciesLoc = species;
     }
         break;
     case 1:
-        SetMultiuseSpriteTemplateToPokemon(GetMonSpritePalStruct(mon)->tag, r4);
+        SetMultiuseSpriteTemplateToPokemon(palette->tag, r4);
+        
         spriteID = CreateSprite(&gMultiuseSpriteTemplate, 120, 70, 6);
         gSprites[spriteID].invisible = TRUE;
         gSprites[spriteID].callback = SpriteCallbackDummy;

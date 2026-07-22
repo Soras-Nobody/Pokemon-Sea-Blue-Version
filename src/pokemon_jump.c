@@ -21,6 +21,7 @@
 #include "trig.h"
 #include "constants/items.h"
 #include "constants/songs.h"
+#include "blend_palette.h"
 
 #define MAX_JUMP_SCORE 99990
 #define MAX_JUMPS 9999
@@ -4165,6 +4166,8 @@ static void CreateJumpMonSprite(struct PokemonJumpGfx *jumpGfx, struct PokemonJu
         spritePalette.data = GetMonSpritePalFromSpeciesAndPersonality(monInfo->species, monInfo->otId, monInfo->personality);
         spritePalette.tag = multiplayerId;
         LoadCompressedSpritePalette(&spritePalette);
+
+        BlendMonPalette(monInfo->personality, OBJ_PLTT_ID(IndexOfSpritePaletteTag(multiplayerId)), FALSE);
 
         Free(buffer);
         Free(unusedBuffer);

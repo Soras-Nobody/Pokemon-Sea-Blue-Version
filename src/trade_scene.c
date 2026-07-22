@@ -34,6 +34,7 @@
 #include "constants/region_map_sections.h"
 #include "constants/moves.h"
 #include "sloopsvc.h"
+#include "blend_palette.h"
 
 // Values for signaling to/from the link partner
 enum {
@@ -735,8 +736,8 @@ static void LoadTradeMonPic(u8 whichParty, u8 state)
 {
     int pos = 0;
     struct Pokemon * mon = NULL;
-    u16 species;
-    u32 personality;
+    
+    const struct CompressedSpritePalette *palette;
 
     if (whichParty == TRADE_PLAYER)
     {
@@ -750,25 +751,34 @@ static void LoadTradeMonPic(u8 whichParty, u8 state)
         pos = B_POSITION_OPPONENT_RIGHT;
     }
 
+    palette = GetMonSpritePalStruct(mon);
+
     switch (state)
     {
     case 0:
+    {
         // Load graphics
-        species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
-        personality = GetMonData(mon, MON_DATA_PERSONALITY);
+        u8 paletteNum;
+        u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
+        u32 personality = GetMonData(mon, MON_DATA_PERSONALITY);
 
         if (whichParty == TRADE_PLAYER)
             HandleLoadSpecialPokePic(&gMonFrontPicTable[species], gMonSpritesGfxPtr->sprites[1], species, personality);
         else
             HandleLoadSpecialPokePic_DontHandleDeoxys(&gMonFrontPicTable[species], gMonSpritesGfxPtr->sprites[whichParty * 2 + 1], species, personality);
 
-        LoadCompressedSpritePalette(GetMonSpritePalStruct(mon));
+        LoadCompressedSpritePalette(palette);
+        paletteNum = IndexOfSpritePaletteTag(palette->tag);
+        BlendMonPalette(personality, OBJ_PLTT_ID(paletteNum), FALSE);
+
         sTradeAnim->monSpecies[whichParty] = species;
         sTradeAnim->monPersonalities[whichParty] = personality;
         break;
+    }
     case 1:
         // Create sprite
-        SetMultiuseSpriteTemplateToPokemon(GetMonSpritePalStruct(mon)->tag, pos);
+        SetMultiuseSpriteTemplateToPokemon(palette->tag, pos);
+        
         sTradeAnim->monSpriteIds[whichParty] = CreateSprite(&gMultiuseSpriteTemplate, 120, 60, 6);
         gSprites[sTradeAnim->monSpriteIds[whichParty]].invisible = TRUE;
         gSprites[sTradeAnim->monSpriteIds[whichParty]].callback = SpriteCallbackDummy;
