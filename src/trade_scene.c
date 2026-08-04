@@ -602,6 +602,19 @@ static const u8 sWirelessSignalAnimParams[][2] = {
     {16, -1}
 };
 
+#define SPECIES_TRADE_PARTNER_TAG 1000
+
+static const struct CompressedSpritePalette *GetTradeMonSpritePalStruct(struct Pokemon *mon, u8 whichParty)
+{
+    static struct CompressedSpritePalette sTradeMonPals[2];
+    const struct CompressedSpritePalette *palette = GetMonSpritePalStruct(mon);
+
+    sTradeMonPals[whichParty] = *palette;
+    sTradeMonPals[whichParty].tag += whichParty * SPECIES_TRADE_PARTNER_TAG;
+
+    return &sTradeMonPals[whichParty];
+}
+
 static void SpriteCB_LinkMonGlow(struct Sprite *sprite)
 {
     if (++sprite->data[0] == 10)
@@ -736,8 +749,8 @@ static void LoadTradeMonPic(u8 whichParty, u8 state)
 {
     int pos = 0;
     struct Pokemon * mon = NULL;
-    
-    const struct CompressedSpritePalette *palette;
+    u16 species;
+    u32 personality;
 
     if (whichParty == TRADE_PLAYER)
     {
@@ -751,37 +764,33 @@ static void LoadTradeMonPic(u8 whichParty, u8 state)
         pos = B_POSITION_OPPONENT_RIGHT;
     }
 
-    palette = GetMonSpritePalStruct(mon);
-
     switch (state)
     {
     case 0:
-    {
         // Load graphics
-        u8 paletteNum;
-        u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
-        u32 personality = GetMonData(mon, MON_DATA_PERSONALITY);
+        species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
+        personality = GetMonData(mon, MON_DATA_PERSONALITY);
 
         if (whichParty == TRADE_PLAYER)
             HandleLoadSpecialPokePic(&gMonFrontPicTable[species], gMonSpritesGfxPtr->sprites[1], species, personality);
         else
             HandleLoadSpecialPokePic_DontHandleDeoxys(&gMonFrontPicTable[species], gMonSpritesGfxPtr->sprites[whichParty * 2 + 1], species, personality);
 
-        LoadCompressedSpritePalette(palette);
-        paletteNum = IndexOfSpritePaletteTag(palette->tag);
-        BlendMonPalette(personality, OBJ_PLTT_ID(paletteNum), FALSE);
-
+        LoadCompressedSpritePalette(GetTradeMonSpritePalStruct(mon, whichParty));
+        
         sTradeAnim->monSpecies[whichParty] = species;
         sTradeAnim->monPersonalities[whichParty] = personality;
         break;
-    }
     case 1:
         // Create sprite
-        SetMultiuseSpriteTemplateToPokemon(palette->tag, pos);
-        
+        SetMultiuseSpriteTemplateToPokemon(GetTradeMonSpritePalStruct(mon, whichParty)->tag, pos);
+
         sTradeAnim->monSpriteIds[whichParty] = CreateSprite(&gMultiuseSpriteTemplate, 120, 60, 6);
         gSprites[sTradeAnim->monSpriteIds[whichParty]].invisible = TRUE;
         gSprites[sTradeAnim->monSpriteIds[whichParty]].callback = SpriteCallbackDummy;
+
+        BlendMonPalette(sTradeAnim->monPersonalities[whichParty], OBJ_PLTT_ID(gSprites[sTradeAnim->monSpriteIds[whichParty]].oam.paletteNum), FALSE);
+
         break;
     }
 }

@@ -1284,24 +1284,10 @@ static void Cmd_nullsub_33(void)
 static void Cmd_if_status_in_party(void)
 {
     struct Pokemon *party;
-    struct Pokemon *partyPtr;
     int i;
     u32 statusToCompareTo;
-    // u8 battlerId
+    u8 battlerId;
 
-    // for whatever reason, game freak put the party pointer into 2 variables instead of 1
-    // it's possible at some point the switch encompassed the whole function and used each respective variable creating largely duplicate code.
-    switch (sAIScriptPtr[1])
-    {
-    case 1:
-        party = partyPtr = gEnemyParty;
-        break;
-    default:
-        party = partyPtr = gPlayerParty;
-        break;
-    }
-
-    /* Emerald's fixed version below
     switch (sAIScriptPtr[1])
     {
     case AI_USER:
@@ -1313,7 +1299,6 @@ static void Cmd_if_status_in_party(void)
     }
 
     party = (GetBattlerSide(battlerId) == B_SIDE_PLAYER) ? gPlayerParty : gEnemyParty;
-    */
 
     statusToCompareTo = T1_READ_32(sAIScriptPtr + 2);
 
@@ -1333,24 +1318,24 @@ static void Cmd_if_status_in_party(void)
     sAIScriptPtr += 10;
 }
 
-// bugged, doesnt return properly. also unused
 static void Cmd_if_status_not_in_party(void)
 {
     struct Pokemon *party;
-    struct Pokemon *partyPtr;
     int i;
     u32 statusToCompareTo;
-    //u8 battlerId
+    u8 battlerId;
 
     switch (sAIScriptPtr[1])
     {
-    case 1:
-        party = partyPtr = gEnemyParty;
+    case AI_USER:
+        battlerId = gBattlerAttacker;
         break;
     default:
-        party = partyPtr = gPlayerParty;
+        battlerId = gBattlerTarget;
         break;
     }
+
+    party = (GetBattlerSide(battlerId) == B_SIDE_PLAYER) ? gPlayerParty : gEnemyParty;
 
     statusToCompareTo = T1_READ_32(sAIScriptPtr + 2);
 
@@ -1360,13 +1345,10 @@ static void Cmd_if_status_not_in_party(void)
         u16 hp = GetMonData(&party[i], MON_DATA_HP);
         u32 status = GetMonData(&party[i], MON_DATA_STATUS);
 
-        // everytime the status is found, the AI's logic jumps further and further past its intended destination. this results in a broken AI macro and is probably why it is unused.
         if (species != SPECIES_NONE && species != SPECIES_EGG && hp != 0 && status == statusToCompareTo)
         {
-            sAIScriptPtr += 10; // doesnt return?
-            #ifdef UBFIX
+            sAIScriptPtr += 10;
             return;
-            #endif
         }
     }
     sAIScriptPtr = T1_READ_PTR(sAIScriptPtr + 6);

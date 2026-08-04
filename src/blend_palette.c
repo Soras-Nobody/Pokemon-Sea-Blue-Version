@@ -17,19 +17,20 @@ static const u16 sBlendColors[] =
 
 void BlendMonPalette(u32 personality, u16 paletteOffset, bool8 random)
 {
+    u32 value;
     u16 color;
     u8 coeff;
 
     if (random)
     {
-        color = sBlendColors[Random() % ARRAY_COUNT(sBlendColors)];
-        coeff = Random() % 2;
+        value = Random32();
     }
     else
     {
-        color = sBlendColors[personality & (ARRAY_COUNT(sBlendColors) - 1)];
-        coeff = (personality >> 3) & 1;
+        value = personality;
     }
+    color = sBlendColors[(value >> 29) & 7];
+    coeff = (value >> 28) & 1;
 
     BlendPalette(paletteOffset, 16, 8, color);
     CpuCopy32(&gPlttBufferFaded[paletteOffset], &gPlttBufferUnfaded[paletteOffset], PLTT_SIZE_4BPP);

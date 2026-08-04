@@ -311,7 +311,6 @@
 	.4byte \ptr
 	.endm
 
-	@ bugged
 	.macro if_status_not_in_party battler:req, status:req, ptr:req
 	.byte 0x35
 	.byte \battler

@@ -101,6 +101,13 @@
       "elevation": 4,
       "dest_map": "MAP_VIRIDIAN_CITY_POKEMON_CENTER_2F",
       "dest_warp_id": "0"
+    },
+    {
+      "x": 3,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_PALLET_TOWN_DEV_FOREST",
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

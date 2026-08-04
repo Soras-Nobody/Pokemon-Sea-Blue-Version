@@ -17,7 +17,7 @@
       "id": "LAYOUT_PALLET_TOWN_PLAYERS_HOUSE_2F",
       "name": "PalletTown_PlayersHouse_2F_Layout",
       "width": 12,
-      "height": 9,
+      "height": 10,
       "border_width": 2,
       "border_height": 2,
       "primary_tileset": "gTileset_Building",
@@ -4380,6 +4380,18 @@
       "secondary_tileset": "gTileset_MtEmber",
       "border_filepath": "data/layouts/OneIsland_KindleRoad_EmberSpa/border.bin",
       "blockdata_filepath": "data/layouts/OneIsland_KindleRoad_EmberSpa/map.bin"
+    },
+    {
+      "id": "LAYOUT_PALLET_TOWN_DEV_FOREST",
+      "name": "PalletTown_DevForest_Layout",
+      "width": 23,
+      "height": 19,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_PalletTown",
+      "border_filepath": "data/layouts/PalletTown_DevForest/border.bin",
+      "blockdata_filepath": "data/layouts/PalletTown_DevForest/map.bin"
     }
   ]
 }

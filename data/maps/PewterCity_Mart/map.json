@@ -79,6 +79,13 @@
       "elevation": 3,
       "dest_map": "MAP_PEWTER_CITY",
       "dest_warp_id": "3"
+    },
+    {
+      "x": 6,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_PALLET_TOWN_DEV_FOREST",
+      "dest_warp_id": "4"
     }
   ],
   "coord_events": [],

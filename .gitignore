@@ -71,3 +71,4 @@ compile_commands.json
 .AddCompLib/
 .porydaw/
 cd.txt
+*.sym
