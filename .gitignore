@@ -62,6 +62,7 @@ porymap.*.cfg
 prefabs.json
 .vscode/
 *.js
+*.sym
 build-cmake-*/
 .cache/
 CMakeLists.txt
@@ -70,5 +71,4 @@ compile_commands.json
 *.ss*
 .AddCompLib/
 .porydaw/
-*.sym
-*.png
+PokemonSeaBlueVersion*.png
