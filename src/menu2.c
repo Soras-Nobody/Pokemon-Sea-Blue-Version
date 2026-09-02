@@ -12,7 +12,7 @@
 static void Task_SmoothBlendLayers(u8 taskId);
 
 static const u8 sMonPosAttributes[][PSA_MON_ATTR_COUNT] = {
-                                  // TMHM_X, TMHM_Y, Y_OFFSET, ITEM_X, ITEM_Y
+                      // TMHM_X, TMHM_Y, Y_OFFSET, ITEM_X, ITEM_Y
     [SPECIES_BULBASAUR       - 1] = {22, 27, 48, 22, 41},
     [SPECIES_IVYSAUR         - 1] = {20, 27, 48, 21, 42},
     [SPECIES_VENUSAUR        - 1] = {27, 32, 32, 27, 51},
@@ -428,6 +428,9 @@ static const u8 sMonPosAttributes[][PSA_MON_ATTR_COUNT] = {
     [SPECIES_DEOXYS          - 1] = {26,  9, 40, 26, 23},
 #endif
     [SPECIES_CHIMECHO        - 1] = {29, 12,  8, 28, 26},
+    [SPECIES_VANILLITE       - 1] = {29, 12,  8, 28, 26},
+    [SPECIES_VANILLISH       - 1] = {29, 12,  8, 28, 26},
+    [SPECIES_VANILLUXE       - 1] = {29, 12,  8, 28, 26},
     [SPECIES_OLD_UNOWN_EMARK - 1] = {32, 33,  8, 32, 43},
     [SPECIES_OLD_UNOWN_QMARK - 1] = {32, 35,  8, 32, 45}
 };

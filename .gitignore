@@ -60,7 +60,7 @@ types_*.taghl
 _Deparsed_XSubs.pm
 porymap.*.cfg
 prefabs.json
-.vscode/*.*
+.vscode/
 *.js
 build-cmake-*/
 .cache/
@@ -70,5 +70,5 @@ compile_commands.json
 *.ss*
 .AddCompLib/
 .porydaw/
-cd.txt
 *.sym
+*.png

@@ -779,6 +779,12 @@ static const u16 sDexCategory_UrbanPkmn_Page12[] = {
     SPECIES_UMBREON,
 };
 
+static const u16 sDexCategory_UrbanPkmn_Page13[] = {
+    SPECIES_VANILLITE,
+    SPECIES_VANILLISH,
+    SPECIES_VANILLUXE,
+};
+
 static const u16 sDexCategory_RarePkmn_Page1[] = {
     SPECIES_UNOWN,
 };
@@ -972,6 +978,7 @@ static const struct PokedexCategoryPage sDexCategory_UrbanPkmn[] = {
     DEX_CATEGORY(UrbanPkmn_Page10),
     DEX_CATEGORY(UrbanPkmn_Page11),
     DEX_CATEGORY(UrbanPkmn_Page12),
+    DEX_CATEGORY(UrbanPkmn_Page13),
 };
 
 static const struct PokedexCategoryPage sDexCategory_RarePkmn[] = {

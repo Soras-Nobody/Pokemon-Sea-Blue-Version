@@ -138,6 +138,9 @@ enum
     CRY_JIRACHI = 385,
     CRY_DEOXYS = 386,
     CRY_CHIMECHO = 387,
+    CRY_VANILLITE = 388,
+    CRY_VANILLISH = 389,
+    CRY_VANILLUXE = 390,
 };
 
 #endif

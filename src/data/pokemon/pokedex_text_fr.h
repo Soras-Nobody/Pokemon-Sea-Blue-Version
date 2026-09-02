@@ -2718,3 +2718,24 @@ const u8 gDeoxysPokedexText[] = _(
     "altering its appearance.");
 
 const u8 gDeoxysPokedexTextUnused[] = _("");
+
+const u8 gVanillitePokedexText[] = _(
+    "The temperature of their breath is -58ºF.\n"
+    "They create snow crystals and make snow\n"
+    "fall in the areas around them.");
+
+const u8 gVanillitePokedexTextUnused[] = _("");
+
+const u8 gVanillishPokedexText[] = _(
+    "Vanillish has existed since the Ice Age.\n"
+    "It controls particles of ice, freezes its\n"
+    "opponents, and then shatters them.");
+
+const u8 gVanillishPokedexTextUnused[] = _("");
+
+const u8 gVanilluxePokedexText[] = _(
+    "Each of its two heads has a brain, and\n"
+    "when they are in agreement, it attacks\n"
+    "by exhaling a violent blizzard.");
+
+const u8 gVanilluxePokedexTextUnused[] = _("");

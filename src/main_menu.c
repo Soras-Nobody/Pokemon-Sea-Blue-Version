@@ -38,6 +38,7 @@ enum MainMenuWindow
 
 #define tMenuType  data[0]
 #define tCursorPos data[1]
+#define tDelay     data[2]
 
 #define tUnused8         data[8]
 #define tMGErrorMsgState data[9]
@@ -51,10 +52,11 @@ static void Task_SetWin0BldRegsNoSaveFileCheck(u8 taskId);
 static void Task_WaitFadeAndPrintMainMenuText(u8 taskId);
 static void Task_PrintMainMenuText(u8 taskId);
 static void Task_WaitDma3AndFadeIn(u8 taskId);
+static void Task_WaitToSetGpuReg(u8 taskId);
 static void Task_UpdateVisualSelection(u8 taskId);
 static void Task_HandleMenuInput(u8 taskId);
 static void Task_ExecuteMainMenuSelection(u8 taskId);
-static void Task_ReturnToTileScreen(u8 taskId);
+static void Task_ReturnToTitleScreen(u8 taskId);
 static void MoveWindowByMenuTypeAndCursorPos(u8 menuType, u8 cursorPos);
 static bool8 HandleMenuInput(u8 taskId);
 static void PrintMessageOnWindow4(const u8 *str);
@@ -237,7 +239,7 @@ static void Task_SetWin0BldRegsAndCheckSaveFile(u8 taskId)
         SetGpuReg(REG_OFFSET_WINOUT, 0x0021);
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_TGT1_BG1 | BLDCNT_TGT1_BG2 | BLDCNT_TGT1_BG3 | BLDCNT_TGT1_OBJ | BLDCNT_TGT1_BD | BLDCNT_EFFECT_DARKEN);
         SetGpuReg(REG_OFFSET_BLDALPHA, BLDALPHA_BLEND(0, 0));
-        SetGpuReg(REG_OFFSET_BLDY, 7);
+        SetGpuReg(REG_OFFSET_BLDY, 0);
         switch (gSaveFileStatus)
         {
         case SAVE_STATUS_OK:
@@ -308,7 +310,7 @@ static void Task_SetWin0BldRegsNoSaveFileCheck(u8 taskId)
         SetGpuReg(REG_OFFSET_WINOUT, 0x0021);
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_TGT1_BG1 | BLDCNT_TGT1_BG2 | BLDCNT_TGT1_BG3 | BLDCNT_TGT1_OBJ | BLDCNT_TGT1_BD | BLDCNT_EFFECT_DARKEN);
         SetGpuReg(REG_OFFSET_BLDALPHA, BLDALPHA_BLEND(0, 0));
-        SetGpuReg(REG_OFFSET_BLDY, 7);
+        SetGpuReg(REG_OFFSET_BLDY, 0);
         gTasks[taskId].func = Task_WaitFadeAndPrintMainMenuText;
     }
 }
@@ -330,7 +332,7 @@ static void Task_PrintMainMenuText(u8 taskId)
     SetGpuReg(REG_OFFSET_WINOUT, 0x0021);
     SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_TGT1_BG1 | BLDCNT_TGT1_BG2 | BLDCNT_TGT1_BG3 | BLDCNT_TGT1_OBJ | BLDCNT_TGT1_BD | BLDCNT_EFFECT_DARKEN);
     SetGpuReg(REG_OFFSET_BLDALPHA, BLDALPHA_BLEND(0, 0));
-    SetGpuReg(REG_OFFSET_BLDY, 7);
+    SetGpuReg(REG_OFFSET_BLDY, 0);
     if (gSaveBlock2Ptr->playerGender == MALE)
         pal = RGB(4, 16, 31);
     else
@@ -393,11 +395,24 @@ static void Task_WaitDma3AndFadeIn(u8 taskId)
 {
     if (WaitDma3Request(-1) != -1)
     {
-        gTasks[taskId].func = Task_UpdateVisualSelection;
+        gTasks[taskId].func = Task_WaitToSetGpuReg;
+        gTasks[taskId].tDelay = 1;
         BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, 0xFFFF);
         ShowBg(0);
         SetVBlankCallback(VBlankCB_MainMenu);
     }
+}
+
+static void Task_WaitToSetGpuReg(u8 taskId)
+{
+    if (gTasks[taskId].tDelay != 0)
+    {
+        gTasks[taskId].tDelay--;
+        return;
+    }
+    SetGpuReg(REG_OFFSET_BLDY, 7);
+    MoveWindowByMenuTypeAndCursorPos(gTasks[taskId].tMenuType, gTasks[taskId].tCursorPos);
+    gTasks[taskId].func = Task_HandleMenuInput;
 }
 
 static void Task_UpdateVisualSelection(u8 taskId)
@@ -488,10 +503,12 @@ static void Task_ExecuteMainMenuSelection(u8 taskId)
     }
 }
 
-static void Task_ReturnToTileScreen(u8 taskId)
+static void Task_ReturnToTitleScreen(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
+        SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(0, 240));
+        SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(0, 160));
         SetMainCallback2(CB2_InitTitleScreen);
         DestroyTask(taskId);
     }
@@ -554,9 +571,7 @@ static bool8 HandleMenuInput(u8 taskId)
     {
         PlaySE(SE_SELECT);
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
-        SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(0, 240));
-        SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(0, 160));
-        gTasks[taskId].func = Task_ReturnToTileScreen;
+        gTasks[taskId].func = Task_ReturnToTitleScreen;
     }
     else if (JOY_NEW(DPAD_UP) && gTasks[taskId].tCursorPos > 0)
     {

@@ -2810,4 +2810,19 @@ static const u16 sTutorLearnsets[] =
                        | TUTOR(MOVE_MIMIC)
                        | TUTOR(MOVE_DREAM_EATER)
                        | TUTOR(MOVE_SUBSTITUTE),
+
+    [SPECIES_VANILLITE] = TUTOR(MOVE_DOUBLE_EDGE)
+                        | TUTOR(MOVE_MIMIC)
+                        | TUTOR(MOVE_DREAM_EATER)
+                        | TUTOR(MOVE_SUBSTITUTE),
+
+    [SPECIES_VANILLISH] = TUTOR(MOVE_DOUBLE_EDGE)
+                        | TUTOR(MOVE_MIMIC)
+                        | TUTOR(MOVE_DREAM_EATER)
+                        | TUTOR(MOVE_SUBSTITUTE),
+
+    [SPECIES_VANILLUXE] = TUTOR(MOVE_DOUBLE_EDGE)
+                        | TUTOR(MOVE_MIMIC)
+                        | TUTOR(MOVE_DREAM_EATER)
+                        | TUTOR(MOVE_SUBSTITUTE),
 };

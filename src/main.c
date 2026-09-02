@@ -296,19 +296,22 @@ void InitKeys(void)
 static void ReadKeys(void)
 {
     u16 keyInput = REG_KEYINPUT ^ KEYS_MASK;
-    gMain.newKeysRaw = keyInput & ~gMain.heldKeysRaw;
-    gMain.newKeys = gMain.newKeysRaw;
-    gMain.newAndRepeatedKeys = gMain.newKeysRaw;
+    u16 rawInput = keyInput;
 
-    // BUG: Key repeat won't work when pressing L using L=A button mode
-    // because it compares the raw key input with the remapped held keys.
-    // Note that newAndRepeatedKeys is never remapped either.
+    // Remap L to A if the L=A option is enabled.
+    if (gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_L_EQUALS_A)
+    {
+        if (keyInput & L_BUTTON)
+            keyInput |= A_BUTTON;
+    }
+
+    gMain.newKeysRaw = rawInput & ~gMain.heldKeysRaw;
+    gMain.newKeys = keyInput & ~gMain.heldKeys;
+    gMain.newAndRepeatedKeys = gMain.newKeys;
 
     if (keyInput != 0 && gMain.heldKeys == keyInput)
     {
-        gMain.keyRepeatCounter--;
-
-        if (gMain.keyRepeatCounter == 0)
+        if (--gMain.keyRepeatCounter == 0)
         {
             gMain.newAndRepeatedKeys = keyInput;
             gMain.keyRepeatCounter = gKeyRepeatContinueDelay;
@@ -320,18 +323,8 @@ static void ReadKeys(void)
         gMain.keyRepeatCounter = gKeyRepeatStartDelay;
     }
 
-    gMain.heldKeysRaw = keyInput;
-    gMain.heldKeys = gMain.heldKeysRaw;
-
-    // Remap L to A if the L=A option is enabled.
-    if (gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_L_EQUALS_A)
-    {
-        if (JOY_NEW(L_BUTTON))
-            gMain.newKeys |= A_BUTTON;
-
-        if (JOY_HELD(L_BUTTON))
-            gMain.heldKeys |= A_BUTTON;
-    }
+    gMain.heldKeysRaw = rawInput;
+    gMain.heldKeys = keyInput;
 
     if (JOY_NEW(gMain.watchedKeysMask))
         gMain.watchedKeysPressed = TRUE;

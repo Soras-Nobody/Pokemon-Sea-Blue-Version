@@ -514,6 +514,9 @@ static const u16 sSpeciesToHoennPokedexNum[NUM_SPECIES - 1] =
     SPECIES_TO_HOENN(JIRACHI),
     SPECIES_TO_HOENN(DEOXYS),
     SPECIES_TO_HOENN(CHIMECHO),
+    SPECIES_TO_HOENN(VANILLITE),
+    SPECIES_TO_HOENN(VANILLISH),
+    SPECIES_TO_HOENN(VANILLUXE),
 };
 
  // Assigns all species to the National Dex Index (Summary No. for National Dex)
@@ -930,6 +933,9 @@ static const u16 sSpeciesToNationalPokedexNum[NUM_SPECIES - 1] =
     SPECIES_TO_NATIONAL(JIRACHI),
     SPECIES_TO_NATIONAL(DEOXYS),
     SPECIES_TO_NATIONAL(CHIMECHO),
+    SPECIES_TO_NATIONAL(VANILLITE),
+    SPECIES_TO_NATIONAL(VANILLISH),
+    SPECIES_TO_NATIONAL(VANILLUXE),
 };
 
 // Assigns all Hoenn Dex Indexes to a National Dex Index
@@ -1137,6 +1143,9 @@ static const u16 sHoennToNationalOrder[NUM_SPECIES - 1] =
     HOENN_TO_NATIONAL(RAYQUAZA),
     HOENN_TO_NATIONAL(JIRACHI),
     HOENN_TO_NATIONAL(DEOXYS),
+    HOENN_TO_NATIONAL(VANILLITE),
+    HOENN_TO_NATIONAL(VANILLISH),
+    HOENN_TO_NATIONAL(VANILLUXE),
     HOENN_TO_NATIONAL(BULBASAUR), // Pokémon from here onwards are UNSEEN in the HoennDex.
     HOENN_TO_NATIONAL(IVYSAUR),
     HOENN_TO_NATIONAL(VENUSAUR),
@@ -3755,6 +3764,23 @@ u8 CalculatePlayerPartyCount(void)
     return gPlayerPartyCount;
 }
 
+u8 CalculateNonEggPlayerPartyCount(void)
+{
+    u8 nonEggPlayerPartyCount = 0;
+
+    gPlayerPartyCount = 0;
+
+    while (gPlayerPartyCount < PARTY_SIZE && GetMonData(&gPlayerParty[gPlayerPartyCount], MON_DATA_SPECIES) != SPECIES_NONE)
+    {
+        if (!GetMonData(&gPlayerParty[gPlayerPartyCount], MON_DATA_IS_EGG))
+            nonEggPlayerPartyCount++;
+        
+        gPlayerPartyCount++;
+    }
+
+    return nonEggPlayerPartyCount;
+}
+
 
 u8 CalculateEnemyPartyCount(void)
 {
@@ -4001,6 +4027,47 @@ bool8 ExecuteTableBasedItemEffect(struct Pokemon *mon, u16 item, u8 partyIndex, 
     }                                                                                                   \
 }
 
+static const struct {
+    u16 flag;
+    u8 cap;
+} sLevelCapTable[] = {
+    { TRAINER_FLAGS_START + TRAINER_CHAMPION_REMATCH_SQUIRTLE,   100 },
+    { TRAINER_FLAGS_START + TRAINER_CHAMPION_REMATCH_BULBASAUR,  100 },
+    { TRAINER_FLAGS_START + TRAINER_CHAMPION_REMATCH_CHARMANDER, 100 },
+    { TRAINER_FLAGS_START + TRAINER_ELITE_FOUR_LANCE_2,           75 },
+    { TRAINER_FLAGS_START + TRAINER_ELITE_FOUR_AGATHA_2,          72 },
+    { TRAINER_FLAGS_START + TRAINER_ELITE_FOUR_BRUNO_2,           70 },
+    { TRAINER_FLAGS_START + TRAINER_ELITE_FOUR_LORELEI_2,         68 },
+    { TRAINER_FLAGS_START + TRAINER_CHAMPION_FIRST_SQUIRTLE,      66 },
+    { TRAINER_FLAGS_START + TRAINER_CHAMPION_FIRST_BULBASAUR,     66 },
+    { TRAINER_FLAGS_START + TRAINER_CHAMPION_FIRST_CHARMANDER,    66 },
+    { TRAINER_FLAGS_START + TRAINER_ELITE_FOUR_LANCE,             63 },
+    { TRAINER_FLAGS_START + TRAINER_ELITE_FOUR_AGATHA,            60 },
+    { TRAINER_FLAGS_START + TRAINER_ELITE_FOUR_BRUNO,             58 },
+    { TRAINER_FLAGS_START + TRAINER_ELITE_FOUR_LORELEI,           56 },
+    { FLAG_BADGE08_GET,                                           54 },
+    { FLAG_BADGE07_GET,                                           50 },
+    { FLAG_BADGE06_GET,                                           47 },
+    { FLAG_BADGE05_GET,                                           43 },
+    { FLAG_BADGE04_GET,                                           43 },
+    { FLAG_BADGE03_GET,                                           29 },
+    { FLAG_BADGE02_GET,                                           24 },
+    { FLAG_BADGE01_GET,                                           21 },
+};
+
+#define LEVEL_CAP_DEFAULT 14
+
+u8 GetCurrentLevelCap(void)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sLevelCapTable); i++)
+    {
+        if (FlagGet(sLevelCapTable[i].flag))
+            return sLevelCapTable[i].cap;
+    }
+    return LEVEL_CAP_DEFAULT;
+}
+
 bool8 PokemonUseItemEffects(struct Pokemon *mon, u16 item, u8 partyIndex, u8 moveIndex, bool8 usedByAI)
 {
     u32 data;
@@ -4164,8 +4231,7 @@ bool8 PokemonUseItemEffects(struct Pokemon *mon, u16 item, u8 partyIndex, u8 mov
             }
 
             // Rare Candy
-            if ((itemEffect[cmdIndex] & ITEM3_LEVEL_UP)
-             && GetMonData(mon, MON_DATA_LEVEL, NULL) != MAX_LEVEL)
+            if ((itemEffect[cmdIndex] & ITEM3_LEVEL_UP) && (FlagGet(FLAG_CAP_LEVEL) ? GetMonData(mon, MON_DATA_LEVEL) < GetCurrentLevelCap() : GetMonData(mon, MON_DATA_LEVEL) != MAX_LEVEL))
             {
                 data = gExperienceTables[gSpeciesInfo[GetMonData(mon, MON_DATA_SPECIES, NULL)].growthRate][GetMonData(mon, MON_DATA_LEVEL, NULL) + 1];
                 SetMonData(mon, MON_DATA_EXP, &data);

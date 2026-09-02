@@ -176,6 +176,7 @@ static u8 ChooseWildMonLevel(const struct WildPokemon * info)
 static u16 GetCurrentMapWildMonHeaderId(void)
 {
     u16 i;
+    bool8 useAlternateHeader = Random() & 1;
 
     for (i = 0; ; i++)
     {
@@ -183,18 +184,20 @@ static u16 GetCurrentMapWildMonHeaderId(void)
         if (wildHeader->mapGroup == MAP_GROUP(MAP_UNDEFINED))
             break;
 
-        if (gWildMonHeaders[i].mapGroup == gSaveBlock1Ptr->location.mapGroup &&
-            gWildMonHeaders[i].mapNum == gSaveBlock1Ptr->location.mapNum)
+        if (gWildMonHeaders[i].mapGroup == gSaveBlock1Ptr->location.mapGroup && gWildMonHeaders[i].mapNum == gSaveBlock1Ptr->location.mapNum)
         {
-            if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_SIX_ISLAND_ALTERING_CAVE) &&
-                gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_SIX_ISLAND_ALTERING_CAVE))
+            if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_SIX_ISLAND_ALTERING_CAVE) && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_SIX_ISLAND_ALTERING_CAVE))
             {
                 u16 alteringCaveId = VarGet(VAR_ALTERING_CAVE_WILD_SET);
                 if (alteringCaveId >= NUM_ALTERING_CAVE_TABLES)
                     alteringCaveId = 0;
 
                 i += alteringCaveId;
+                if (useAlternateHeader)
+                    i += NUM_ALTERING_CAVE_TABLES;
             }
+            else if (useAlternateHeader)
+                i++;
 
             if (!UnlockedTanobyOrAreNotInTanoby())
                 break;

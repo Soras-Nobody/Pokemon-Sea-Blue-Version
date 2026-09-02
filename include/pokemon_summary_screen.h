@@ -19,7 +19,6 @@ void SetPokemonSummaryScreenMode(u8);
 enum PokemonSummaryScreenMode
 {
     PSS_MODE_NORMAL,
-    PSS_MODE_UNK1,
     PSS_MODE_SELECT_MOVE,
     PSS_MODE_FORGET_MOVE,
     PSS_MODE_TRADE,
@@ -32,8 +31,9 @@ enum PokemonSummaryScreenPage
     PSS_PAGE_SKILLS,
     PSS_PAGE_MOVES,
     PSS_PAGE_MOVES_INFO,
-    PSS_PAGE_UNK4,
     PSS_PAGE_MOVE_DELETER,
+    PSS_PAGE_SKILLS_INFO,
+    PSS_PAGE_INFO_EXIT,
 };
 
 enum PokemonSummaryScreenState3270
@@ -70,8 +70,8 @@ enum PokemonSummaryScreenStat
 
 #define TAG_PSS_UNK_64 0x64
 #define TAG_PSS_UNK_65 0x65
-#define TAG_PSS_UNK_66 0x66
-#define TAG_PSS_UNK_67 0x67
+#define TAG_PSS_UNK_66 0x66 // unused
+#define TAG_PSS_UNK_67 0x67 // unused
 #define TAG_PSS_UNK_6E 0x6E
 #define TAG_PSS_UNK_78 0x78
 #define TAG_PSS_UNK_82 0x82

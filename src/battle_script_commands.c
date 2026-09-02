@@ -37,6 +37,7 @@
 #include "constants/pokemon.h"
 #include "constants/maps.h"
 #include "blend_palette.h"
+#include "pokemon.h"
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 
@@ -3196,13 +3197,13 @@ static void Cmd_getexp(void)
 
             if (FlagGet(FLAG_GLOBAL_EXP_SHARE) ? GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_IS_EGG) : (holdEffect != HOLD_EFFECT_EXP_SHARE) && !(gBattleStruct->sentInPokes & 1))
             {
-                *(&gBattleStruct->sentInPokes) >>= 1;
+                gBattleStruct->sentInPokes >>= 1;
                 gBattleScripting.getexpState = 5;
                 gBattleMoveDamage = 0; // used for exp
             }
-            else if (FlagGet(FLAG_CAP_LEVEL) ? GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) >= (FlagGet(FLAG_BADGE08_GET) ? 100 : FlagGet(FLAG_BADGE06_GET) ? 70 : FlagGet(FLAG_BADGE04_GET) ? 50 : FlagGet(FLAG_BADGE02_GET) ? 30  : 10) : GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) == MAX_LEVEL)
+            else if (FlagGet(FLAG_CAP_LEVEL) ? GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) >= GetCurrentLevelCap() : GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) == MAX_LEVEL)
             {
-                *(&gBattleStruct->sentInPokes) >>= 1;
+                gBattleStruct->sentInPokes >>= 1;
                 gBattleScripting.getexpState = 5;
                 gBattleMoveDamage = 0; // used for exp
             }
@@ -3258,13 +3259,12 @@ static void Cmd_getexp(void)
                         gBattleStruct->expGetterBattlerId = 0;
                     }
 
-                    PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, gBattleStruct->expGetterBattlerId, gBattleStruct->expGetterMonId);
-                    // buffer 'gained' or 'gained a boosted'
-                    PREPARE_STRING_BUFFER(gBattleTextBuff2, i);
-                    PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff3, 5, gBattleMoveDamage);
-
                     if (!FlagGet(FLAG_GLOBAL_EXP_SHARE))
                     {
+                        PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, gBattleStruct->expGetterBattlerId, gBattleStruct->expGetterMonId);
+                        // buffer 'gained' or 'gained a boosted'
+                        PREPARE_STRING_BUFFER(gBattleTextBuff2, i);
+                        PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff3, 5, gBattleMoveDamage);
                         PrepareStringBattle(STRINGID_PKMNGAINEDEXP, gBattleStruct->expGetterBattlerId);
                     }
                     else if (!gBattleStruct->expShareMsgShown)
@@ -3283,7 +3283,7 @@ static void Cmd_getexp(void)
         if (gBattleControllerExecFlags == 0)
         {
             gBattleBufferB[gBattleStruct->expGetterBattlerId][0] = 0;
-            if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HP) && (FlagGet(FLAG_CAP_LEVEL) ? GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) < (FlagGet(FLAG_BADGE08_GET) ? 100 : FlagGet(FLAG_BADGE06_GET) ? 70 : FlagGet(FLAG_BADGE04_GET) ? 50 : FlagGet(FLAG_BADGE02_GET) ? 30 : 10) : GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) != MAX_LEVEL))
+            if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HP) && (FlagGet(FLAG_CAP_LEVEL) ? GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) < GetCurrentLevelCap() : GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) != MAX_LEVEL))
             {
                 gBattleResources->beforeLvlUp->stats[STAT_HP]    = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_MAX_HP);
                 gBattleResources->beforeLvlUp->stats[STAT_ATK]   = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_ATK);
@@ -3296,7 +3296,7 @@ static void Cmd_getexp(void)
                 BtlController_EmitExpUpdate(BUFFER_A, gBattleStruct->expGetterMonId, gBattleMoveDamage);
                 MarkBattlerForControllerExec(gActiveBattler);
             }
-            else if (FlagGet(FLAG_CAP_LEVEL) && GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) >= (FlagGet(FLAG_BADGE08_GET) ? 100 : FlagGet(FLAG_BADGE06_GET) ? 70 : FlagGet(FLAG_BADGE04_GET) ? 50 : FlagGet(FLAG_BADGE02_GET) ? 30 : 10))
+            else if (FlagGet(FLAG_CAP_LEVEL) && GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) >= GetCurrentLevelCap())
             {
                 PrepareStringBattle(STRINGID_PKMNREACHEDLEVELCAP, gBattleStruct->expGetterBattlerId);
             }

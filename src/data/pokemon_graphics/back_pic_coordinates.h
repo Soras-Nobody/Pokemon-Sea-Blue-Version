@@ -2060,6 +2060,21 @@ const struct MonCoords gMonBackPicCoords[] =
         .size = MON_COORDS_SIZE(32, 56),
         .y_offset = 7,
     },
+    [SPECIES_VANILLITE] =
+    {
+        .size = MON_COORDS_SIZE(40, 48),
+        .y_offset = 9,
+    },
+    [SPECIES_VANILLISH] =
+    {
+        .size = MON_COORDS_SIZE(48, 56),
+        .y_offset = 4,
+    },
+    [SPECIES_VANILLUXE] =
+    {
+        .size = MON_COORDS_SIZE(64, 64),
+        .y_offset = 6,
+    },
     [SPECIES_EGG] =
     {
         .size = MON_COORDS_SIZE(24, 48),

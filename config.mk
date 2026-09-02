@@ -3,8 +3,6 @@
 GAME_VERSION  := FIRERED
 GAME_REVISION := 0
 GAME_LANGUAGE := ENGLISH
-
-# Builds the ROM using a modern compiler
 MODERN        := 0
 
 # For gbafix

@@ -412,5 +412,8 @@ const u8 *const gMonFootprintTable[] =
     [SPECIES_JIRACHI] = gMonFootprint_Jirachi,
     [SPECIES_DEOXYS] = gMonFootprint_Deoxys,
     [SPECIES_CHIMECHO] = gMonFootprint_Chimecho,
+    [SPECIES_VANILLITE] = gMonFootprint_Vanillite,
+    [SPECIES_VANILLISH] = gMonFootprint_Vanillish,
+    [SPECIES_VANILLUXE] = gMonFootprint_Vanilluxe,
     [SPECIES_EGG] = gMonFootprint_Bulbasaur,
 };

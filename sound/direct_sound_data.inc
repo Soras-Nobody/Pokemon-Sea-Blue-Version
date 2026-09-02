@@ -1855,6 +1855,17 @@ Cry_Deoxys::
 Cry_Chimecho::
 	.incbin "sound/direct_sound_samples/cries/chimecho.bin"
 
+	.align 2
+Cry_Vanillite::
+	.incbin "sound/direct_sound_samples/cries/vanillite.bin"
+
+	.align 2
+Cry_Vanillish::
+	.incbin "sound/direct_sound_samples/cries/vanillish.bin"
+
+	.align 2
+Cry_Vanilluxe::
+	.incbin "sound/direct_sound_samples/cries/vanilluxe.bin"
 
 	.align 2
 DirectSoundWaveData_register_noise::

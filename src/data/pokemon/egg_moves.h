@@ -1306,5 +1306,11 @@ const u16 gEggMoves[] = {
               MOVE_HYPNOSIS,
               MOVE_DREAM_EATER),
 
+    egg_moves(VANILLITE,
+              MOVE_WATER_PULSE,
+              MOVE_IMPRISON,
+              MOVE_IRON_DEFENSE,
+              MOVE_POWDER_SNOW),
+
     EGG_MOVES_TERMINATOR
 };

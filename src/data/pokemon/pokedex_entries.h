@@ -5030,4 +5030,43 @@ const struct PokedexEntry gPokedexEntries[] =
         .trainerScale = 337,
         .trainerOffset = 2,
     },
+
+    [NATIONAL_DEX_VANILLITE] =
+    {
+        .categoryName = _("FRESH SNOW"),
+        .height = 4,
+        .weight = 57,
+        .description = gVanillitePokedexText,
+        .unusedDescription = gVanillitePokedexTextUnused,
+        .pokemonScale = 491,
+        .pokemonOffset = 12,
+        .trainerScale = 256,
+        .trainerOffset = 0,
+    },
+
+    [NATIONAL_DEX_VANILLISH] =
+    {
+        .categoryName = _("ICY SNOW"),
+        .height = 11,
+        .weight = 410,
+        .description = gVanillishPokedexText,
+        .unusedDescription = gVanillishPokedexTextUnused,
+        .pokemonScale = 320,
+        .pokemonOffset = 7,
+        .trainerScale = 256,
+        .trainerOffset = 0,
+    },
+
+    [NATIONAL_DEX_VANILLUXE] =
+    {
+        .categoryName = _("SNOWSTORM"),
+        .height = 13,
+        .weight = 575,
+        .description = gVanilluxePokedexText,
+        .unusedDescription = gVanilluxePokedexTextUnused,
+        .pokemonScale = 293,
+        .pokemonOffset = 0,
+        .trainerScale = 337,
+        .trainerOffset = 2,
+    },
 };
