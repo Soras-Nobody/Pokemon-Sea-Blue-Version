@@ -10,6 +10,7 @@
 #include "overworld.h"
 #include "metatile_behavior.h"
 #include "event_scripts.h"
+#include "safari_zone.h"
 #include "script.h"
 #include "link.h"
 #include "quest_log.h"
@@ -226,20 +227,19 @@ static bool8 UnlockedTanobyOrAreNotInTanoby(void)
     return FALSE;
 }
 
-static void GenerateWildMon(u16 species, u8 level, u8 slot)
+static void GenerateWildMon(u16 species, u8 level, u8 slot, u8 index)
 {
     u32 personality;
     s8 chamber;
-    ZeroEnemyPartyMons();
     if (species != SPECIES_UNOWN)
     {
-        CreateMonWithNature(&gEnemyParty[0], species, level, USE_RANDOM_IVS, Random() % NUM_NATURES);
+        CreateMonWithNature(&gEnemyParty[index], species, level, USE_RANDOM_IVS, Random() % NUM_NATURES);
     }
     else
     {
         chamber = gSaveBlock1Ptr->location.mapNum - MAP_NUM(MAP_SEVEN_ISLAND_TANOBY_RUINS_MONEAN_CHAMBER);
         personality = GenerateUnownPersonalityByLetter(sUnownLetterSlots[chamber][slot]);
-        CreateMon(&gEnemyParty[0], species, level, USE_RANDOM_IVS, TRUE, personality, FALSE, 0);
+        CreateMon(&gEnemyParty[index], species, level, USE_RANDOM_IVS, TRUE, personality, FALSE, 0);
     }
 }
 
@@ -269,28 +269,30 @@ enum
 #define WILD_CHECK_REPEL    0x1
 #define WILD_CHECK_KEEN_EYE 0x2
 
-static bool8 TryGenerateWildMon(const struct WildPokemonInfo * info, u8 area, u8 flags)
+static bool8 TryGenerateWildMons(const struct WildPokemonInfo * info, u8 area, u8 flags, bool8 isDoubleBattle)
 {
-    u8 slot = 0;
-    u8 level;
-    switch (area)
+    int i;
+    u8 slot[2] = {0};
+    u8 level[2];
+    for (i = 0; i <= isDoubleBattle; i++)
     {
-    case WILD_AREA_LAND:
-        slot = ChooseWildMonIndex_Land();
-        break;
-    case WILD_AREA_WATER:
-        slot = ChooseWildMonIndex_WaterRock();
-        break;
-    case WILD_AREA_ROCKS:
-        slot = ChooseWildMonIndex_WaterRock();
-        break;
+        switch (area)
+        {
+        case WILD_AREA_LAND:
+            slot[i] = ChooseWildMonIndex_Land();
+            break;
+        case WILD_AREA_WATER:
+        case WILD_AREA_ROCKS:
+            slot[i] = ChooseWildMonIndex_WaterRock();
+            break;
+        }
+        level[i] = ChooseWildMonLevel(&info->wildPokemon[slot[i]]);
+        if (flags == WILD_CHECK_REPEL && !IsWildLevelAllowedByRepel(level[i]))
+            return FALSE;
     }
-    level = ChooseWildMonLevel(&info->wildPokemon[slot]);
-    if (flags == WILD_CHECK_REPEL && !IsWildLevelAllowedByRepel(level))
-    {
-        return FALSE;
-    }
-    GenerateWildMon(info->wildPokemon[slot].species, level, slot);
+    ZeroEnemyPartyMons();
+    for (i = 0; i <= isDoubleBattle; i++)
+        GenerateWildMon(info->wildPokemon[slot[i]].species, level[i], slot[i], i);
     return TRUE;
 }
 
@@ -298,7 +300,8 @@ static u16 GenerateFishingEncounter(const struct WildPokemonInfo * info, u8 rod)
 {
     u8 slot = ChooseWildMonIndex_Fishing(rod);
     u8 level = ChooseWildMonLevel(&info->wildPokemon[slot]);
-    GenerateWildMon(info->wildPokemon[slot].species, level, slot);
+    ZeroEnemyPartyMons();
+    GenerateWildMon(info->wildPokemon[slot].species, level, slot, 0);
     return info->wildPokemon[slot].species;
 }
 
@@ -355,6 +358,11 @@ static bool8 DoGlobalWildEncounterDiceRoll(void)
     return TRUE;
 }
 
+static bool8 IsPlayerEligibleForDoubleBattle(void)
+{
+    return !GetSafariZoneFlag() && GetMonsStateToDoubles() == PLAYER_HAS_TWO_USABLE_MONS;
+}
+
 bool8 StandardWildEncounter(u32 currMetatileAttrs, u16 previousMetatileBehavior)
 {
     u16 headerId;
@@ -366,18 +374,19 @@ bool8 StandardWildEncounter(u32 currMetatileAttrs, u16 previousMetatileBehavior)
     headerId = GetCurrentMapWildMonHeaderId();
     if (headerId != HEADER_NONE)
     {
+        bool8 isDouble = IsPlayerEligibleForDoubleBattle();
         if (ExtractMetatileAttribute(currMetatileAttrs, METATILE_ATTRIBUTE_ENCOUNTER_TYPE) == TILE_ENCOUNTER_LAND)
         {
             if (gWildMonHeaders[headerId].landMonsInfo == NULL)
                 return FALSE;
             else if (previousMetatileBehavior != ExtractMetatileAttribute(currMetatileAttrs, METATILE_ATTRIBUTE_BEHAVIOR) && !DoGlobalWildEncounterDiceRoll())
                 return FALSE;
+
             if (DoWildEncounterRateTest(gWildMonHeaders[headerId].landMonsInfo->encounterRate, FALSE) != TRUE)
             {
                 AddToWildEncounterRateBuff(gWildMonHeaders[headerId].landMonsInfo->encounterRate);
                 return FALSE;
             }
-
             else if (TryStartRoamerEncounter() == TRUE)
             {
                 roamer = &gSaveBlock1Ptr->roamer;
@@ -389,13 +398,14 @@ bool8 StandardWildEncounter(u32 currMetatileAttrs, u16 previousMetatileBehavior)
                 StartRoamerBattle();
                 return TRUE;
             }
-            else
+            else // try a regular wild land encounter
             {
+                if (isDouble && DoWildEncounterRateTest(gWildMonHeaders[headerId].landMonsInfo->encounterRate, FALSE) != TRUE)
+                    isDouble = FALSE;
 
-                // try a regular wild land encounter
-                if (TryGenerateWildMon(gWildMonHeaders[headerId].landMonsInfo, WILD_AREA_LAND, WILD_CHECK_REPEL) == TRUE)
+                if (TryGenerateWildMons(gWildMonHeaders[headerId].landMonsInfo, WILD_AREA_LAND, WILD_CHECK_REPEL, isDouble) == TRUE)
                 {
-                    StartWildBattle();
+                    StartWildBattle(isDouble);
                     return TRUE;
                 }
                 else
@@ -404,8 +414,7 @@ bool8 StandardWildEncounter(u32 currMetatileAttrs, u16 previousMetatileBehavior)
                 }
             }
         }
-        else if (ExtractMetatileAttribute(currMetatileAttrs, METATILE_ATTRIBUTE_ENCOUNTER_TYPE) == TILE_ENCOUNTER_WATER
-                 || (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) && MetatileBehavior_IsBridge(ExtractMetatileAttribute(currMetatileAttrs, METATILE_ATTRIBUTE_BEHAVIOR)) == TRUE))
+        else if (ExtractMetatileAttribute(currMetatileAttrs, METATILE_ATTRIBUTE_ENCOUNTER_TYPE) == TILE_ENCOUNTER_WATER || (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) && MetatileBehavior_IsBridge(ExtractMetatileAttribute(currMetatileAttrs, METATILE_ATTRIBUTE_BEHAVIOR)) == TRUE))
         {
             if (gWildMonHeaders[headerId].waterMonsInfo == NULL)
                 return FALSE;
@@ -430,9 +439,12 @@ bool8 StandardWildEncounter(u32 currMetatileAttrs, u16 previousMetatileBehavior)
             }
             else // try a regular surfing encounter
             {
-                if (TryGenerateWildMon(gWildMonHeaders[headerId].waterMonsInfo, WILD_AREA_WATER, WILD_CHECK_REPEL) == TRUE)
+                if (isDouble && DoWildEncounterRateTest(gWildMonHeaders[headerId].waterMonsInfo->encounterRate, FALSE) != TRUE)
+                    isDouble = FALSE;
+
+                if (TryGenerateWildMons(gWildMonHeaders[headerId].waterMonsInfo, WILD_AREA_WATER, WILD_CHECK_REPEL, isDouble) == TRUE)
                 {
-                    StartWildBattle();
+                    StartWildBattle(isDouble);
                     return TRUE;
                 }
                 else
@@ -455,9 +467,9 @@ void RockSmashWildEncounter(void)
         gSpecialVar_Result = FALSE;
     else if (DoWildEncounterRateTest(gWildMonHeaders[headerIdx].rockSmashMonsInfo->encounterRate, TRUE) != TRUE)
         gSpecialVar_Result = FALSE;
-    else if (TryGenerateWildMon(gWildMonHeaders[headerIdx].rockSmashMonsInfo, WILD_AREA_ROCKS, WILD_CHECK_REPEL) == TRUE)
+    else if (TryGenerateWildMons(gWildMonHeaders[headerIdx].rockSmashMonsInfo, WILD_AREA_ROCKS, WILD_CHECK_REPEL, FALSE) == TRUE)
     {
-        StartWildBattle();
+        StartWildBattle(FALSE);
         gSpecialVar_Result = TRUE;
     }
     else
@@ -473,6 +485,7 @@ bool8 SweetScentWildEncounter(void)
     headerId = GetCurrentMapWildMonHeaderId();
     if (headerId != HEADER_NONE)
     {
+        bool8 isDouble = IsPlayerEligibleForDoubleBattle();
         if (MapGridGetMetatileAttributeAt(x, y, METATILE_ATTRIBUTE_ENCOUNTER_TYPE) == TILE_ENCOUNTER_LAND)
         {
             if (TryStartRoamerEncounter() == TRUE)
@@ -484,9 +497,10 @@ bool8 SweetScentWildEncounter(void)
             if (gWildMonHeaders[headerId].landMonsInfo == NULL)
                 return FALSE;
 
-            TryGenerateWildMon(gWildMonHeaders[headerId].landMonsInfo, WILD_AREA_LAND, 0);
-
-            StartWildBattle();
+            if (isDouble && DoWildEncounterRateTest(gWildMonHeaders[headerId].landMonsInfo->encounterRate, FALSE) != TRUE)
+                isDouble = FALSE;
+            TryGenerateWildMons(gWildMonHeaders[headerId].landMonsInfo, WILD_AREA_LAND, 0, isDouble);
+            StartWildBattle(isDouble);
             return TRUE;
         }
         else if (MapGridGetMetatileAttributeAt(x, y, METATILE_ATTRIBUTE_ENCOUNTER_TYPE) == TILE_ENCOUNTER_WATER)
@@ -500,8 +514,10 @@ bool8 SweetScentWildEncounter(void)
             if (gWildMonHeaders[headerId].waterMonsInfo == NULL)
                 return FALSE;
 
-            TryGenerateWildMon(gWildMonHeaders[headerId].waterMonsInfo, WILD_AREA_WATER, 0);
-            StartWildBattle();
+            if (isDouble && DoWildEncounterRateTest(gWildMonHeaders[headerId].waterMonsInfo->encounterRate, FALSE) != TRUE)
+                isDouble = FALSE;
+            TryGenerateWildMons(gWildMonHeaders[headerId].waterMonsInfo, WILD_AREA_WATER, 0, isDouble);
+            StartWildBattle(isDouble);
             return TRUE;
         }
     }
@@ -523,7 +539,7 @@ void FishingWildEncounter(u8 rod)
 {
     GenerateFishingEncounter(gWildMonHeaders[GetCurrentMapWildMonHeaderId()].fishingMonsInfo, rod);
     IncrementGameStat(GAME_STAT_FISHING_CAPTURES);
-    StartWildBattle();
+    StartWildBattle(FALSE);
 }
 
 u16 GetLocalWildMon(bool8 *isWaterMon)

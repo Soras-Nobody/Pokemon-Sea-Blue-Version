@@ -1312,7 +1312,7 @@ bool8 ScrCmd_closemessage(struct ScriptContext * ctx)
 
 static bool8 WaitForAorBPress(void)
 {
-    if (JOY_NEW(A_BUTTON | B_BUTTON) || JOY_HELD(A_BUTTON | B_BUTTON))
+    if (JOY_NEW(A_BUTTON | B_BUTTON))
         return TRUE;
 
     if (ScriptContext_NextCommandEndsScript(sQuestLogScriptContextPtr) == TRUE)

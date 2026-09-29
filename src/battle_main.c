@@ -3561,7 +3561,7 @@ static void SetActionsAndBattlersTurnOrder(void)
     }
     else
     {
-        if (gBattleTypeFlags & BATTLE_TYPE_LINK)
+        if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_DOUBLE))
         {
             for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
             {
@@ -4268,18 +4268,30 @@ bool8 TryRunFromBattle(u8 battler)
     }
     else
     {
-        if (!(gBattleTypeFlags & BATTLE_TYPE_DOUBLE))
+        u8 playerSpeed = gBattleMons[battler].speed;
+        u8 enemySpeed = gBattleMons[BATTLE_OPPOSITE(battler)].speed;
+
+        if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
         {
-            if (gBattleMons[battler].speed < gBattleMons[BATTLE_OPPOSITE(battler)].speed)
-            {
-                speedVar = (gBattleMons[battler].speed * 128) / (gBattleMons[BATTLE_OPPOSITE(battler)].speed) + (gBattleStruct->runTries * 30);
-                if (speedVar > (Random() & 0xFF))
-                    effect++;
-            }
-            else // same speed or faster
-            {
+            u8 playerPartner = BATTLE_PARTNER(battler);
+            u8 enemyPartner = BATTLE_PARTNER(BATTLE_OPPOSITE(battler));
+
+            if (!(gAbsentBattlerFlags & gBitTable[playerPartner]) && gBattleMons[playerPartner].hp != 0 && gBattleMons[playerPartner].speed < playerSpeed)
+                playerSpeed = gBattleMons[playerPartner].speed;
+
+            if (!(gAbsentBattlerFlags & gBitTable[enemyPartner]) && gBattleMons[enemyPartner].hp != 0 && gBattleMons[enemyPartner].speed > enemySpeed)
+                enemySpeed = gBattleMons[enemyPartner].speed;
+        }
+
+        if (playerSpeed < enemySpeed)
+        {
+            speedVar = (playerSpeed * 128) / (enemySpeed) + (gBattleStruct->runTries * 30);
+            if (speedVar > (Random() & 0xFF))
                 effect++;
-            }
+        }
+        else // same speed or faster
+        {
+            effect++;
         }
 
         ++gBattleStruct->runTries;

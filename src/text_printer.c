@@ -65,8 +65,6 @@ u16 AddTextPrinterParameterized(u8 windowId, u8 fontId, const u8 *str, u8 x, u8 
     return AddTextPrinter(&printerTemplate, speed, callback);
 }
 
-#define TEXT_LIMIT 0x400
-
 bool16 AddTextPrinter(struct TextPrinterTemplate *textSubPrinter, u8 speed, void (*callback)(struct TextPrinterTemplate *, u16))
 {
     int i;
@@ -100,7 +98,7 @@ bool16 AddTextPrinter(struct TextPrinterTemplate *textSubPrinter, u8 speed, void
         sTempTextPrinter.textSpeed = 0;
         
         // Render all text (up to limit) at once
-        for (j = 0; j < TEXT_LIMIT; ++j)
+        for (j = 0; j < 0x400; ++j)
         {
             if (RenderFont(&sTempTextPrinter) == RENDER_FINISH)
                 break;
@@ -122,19 +120,7 @@ void RunTextPrinters(void)
     {
         if (sTextPrinters[i].active)
         {
-            bool8 isInstant = (gSaveBlock2Ptr->optionsTextSpeed == OPTIONS_TEXT_SPEED_INSTANT);
-            int n;
-            u16 renderCmd;
-
-            // Render all text (up to limit) at once
-            for (n = 0; n <= isInstant * (TEXT_LIMIT - 1); ++n)
-            {
-                renderCmd = RenderFont(&sTextPrinters[i]);
-                if (renderCmd != RENDER_PRINT)
-                    break;
-            }
-            if (isInstant && renderCmd != RENDER_PRINT)
-                CopyWindowToVram(sTextPrinters[i].printerTemplate.windowId, COPYWIN_GFX);
+            u16 renderCmd = RenderFont(&sTextPrinters[i]);
             switch (renderCmd)
             {
             case RENDER_PRINT:
